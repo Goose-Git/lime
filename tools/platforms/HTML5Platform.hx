@@ -292,7 +292,9 @@ class HTML5Platform extends PlatformTarget
 		System.mkdir(destination);
 
 		var webfontDirectory = targetDirectory + "/obj/webfont";
-		var useWebfonts = true;
+
+		// Goose engine - dont try and use webfonts
+		var useWebfonts = false;
 
 		for (haxelib in project.haxelibs)
 		{
@@ -320,8 +322,7 @@ class HTML5Platform extends PlatformTarget
 						var originalPath = asset.sourcePath;
 						asset.sourcePath = fontPath;
 
-						// Goose engine doesnt want this, this generates web font files for each ttf
-						// HTML5Helper.generateWebfonts(project, asset);
+						HTML5Helper.generateWebfonts(project, asset);
 
 						var ext = "." + Path.extension(asset.sourcePath);
 						var source = Path.withoutExtension(asset.sourcePath);
@@ -453,84 +454,15 @@ class HTML5Platform extends PlatformTarget
 
 			if (asset.type != AssetType.TEMPLATE)
 			{
-				if (/*asset.embed != true &&*/ asset.type != AssetType.FONT)
+				// Goose engine removed some code here to embed fonts into html5 as CSS
+				dir = Path.directory(path);
+				if (!createdDirectories.exists(dir))
 				{
-					dir = Path.directory(path);
-					if (!createdDirectories.exists(dir))
-					{
-						System.mkdir(dir);
-						createdDirectories.set(dir, true);
-					}
-					AssetHelper.copyAssetIfNewer(asset, path);
+					System.mkdir(dir);
+					createdDirectories.set(dir, true);
 				}
-				else if (asset.type == AssetType.FONT && useWebfonts)
-				{
-					System.mkdir(Path.directory(path));
-					var ext = "." + Path.extension(asset.sourcePath);
-					var source = Path.withoutExtension(asset.sourcePath);
-
-					var hasFormat = [false, false, false, false];
-					var extensions = [ext, ".eot", ".svg", ".woff"];
-					var extension;
-
-					for (i in 0...extensions.length)
-					{
-						extension = extensions[i];
-
-						if (FileSystem.exists(source + extension))
-						{
-							System.copyIfNewer(source + extension, path + extension);
-							hasFormat[i] = true;
-						}
-					}
-
-					var shouldEmbedFont = false;
-
-					for (embedded in hasFormat)
-					{
-						if (embedded) shouldEmbedFont = true;
-					}
-
-					var embeddedAssets:Array<Dynamic> = cast context.assets;
-					for (embeddedAsset in embeddedAssets)
-					{
-						if (embeddedAsset.type == "font" && embeddedAsset.sourcePath == asset.sourcePath)
-						{
-							#if lime
-							var font = Font.fromFile(asset.sourcePath);
-
-							embeddedAsset.ascender = font.ascender;
-							embeddedAsset.descender = font.descender;
-							embeddedAsset.height = font.height;
-							embeddedAsset.numGlyphs = font.numGlyphs;
-							embeddedAsset.underlinePosition = font.underlinePosition;
-							embeddedAsset.underlineThickness = font.underlineThickness;
-							embeddedAsset.unitsPerEM = font.unitsPerEM;
-
-							if (shouldEmbedFont)
-							{
-								var urls = [];
-								if (hasFormat[1]) urls.push("url('" + embeddedAsset.targetPath + ".eot?#iefix') format('embedded-opentype')");
-								if (hasFormat[3]) urls.push("url('" + embeddedAsset.targetPath + ".woff') format('woff')");
-								urls.push("url('" + embeddedAsset.targetPath + ext + "') format('truetype')");
-								if (hasFormat[2]) urls.push("url('" + embeddedAsset.targetPath + ".svg#" + StringTools.urlEncode(embeddedAsset.fontName)
-									+ "') format('svg')");
-
-								var fontFace = "\t\t@font-face {\n";
-								fontFace += "\t\t\tfont-family: '" + embeddedAsset.fontName + "';\n";
-								// if (hasFormat[1]) fontFace += "\t\t\tsrc: url('" + embeddedAsset.targetPath + ".eot');\n";
-								fontFace += "\t\t\tsrc: " + urls.join(",\n\t\t\t") + ";\n";
-								fontFace += "\t\t\tfont-weight: normal;\n";
-								fontFace += "\t\t\tfont-style: normal;\n";
-								fontFace += "\t\t}\n";
-
-								embeddedAsset.cssFontFace = fontFace;
-							}
-							break;
-							#end
-						}
-					}
-				}
+				AssetHelper.copyAssetIfNewer(asset, path);
+				
 			}
 		}
 

@@ -229,12 +229,13 @@ class AssetHelper
 		}
 		else if (project.target == HTML5)
 		{
+			/* Goose Engine Change
 			if (asset.type == FONT)
 			{
 				assetData.className = "__ASSET__" + asset.flatName;
 				assetData.preload = true;
 			}
-			else
+			else*/
 			{
 				assetData.path = asset.resourceName;
 
@@ -271,11 +272,15 @@ class AssetHelper
 				assetData.preload = true;
 			}
 
+			// Goose Engine - this appears to be the part which will make a font
+			// act like a class instead of a binary file. Since we are using hxFreeType to load fonts
+			// we want it treated like a binary file.
+			/*
 			if (asset.embed == true || asset.type == FONT)
 			{
 				assetData.className = "__ASSET__" + asset.flatName;
 			}
-			else
+			else*/
 			{
 				assetData.path = asset.resourceName;
 			}
