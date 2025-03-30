@@ -294,6 +294,9 @@ class HTML5Platform extends PlatformTarget
 		var webfontDirectory = targetDirectory + "/obj/webfont";
 		var useWebfonts = true;
 
+		// Goose engine changed this as we use hxFreeType
+		useWebfonts = false;
+
 		for (haxelib in project.haxelibs)
 		{
 			if (haxelib.name == "openfl-html5-dom" || haxelib.name == "openfl-bitfive")
