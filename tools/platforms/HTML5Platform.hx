@@ -294,9 +294,6 @@ class HTML5Platform extends PlatformTarget
 		var webfontDirectory = targetDirectory + "/obj/webfont";
 		var useWebfonts = true;
 
-		// Goose engine changed this as we use hxFreeType
-		useWebfonts = false;
-
 		for (haxelib in project.haxelibs)
 		{
 			if (haxelib.name == "openfl-html5-dom" || haxelib.name == "openfl-bitfive")
@@ -323,7 +320,8 @@ class HTML5Platform extends PlatformTarget
 						var originalPath = asset.sourcePath;
 						asset.sourcePath = fontPath;
 
-						HTML5Helper.generateWebfonts(project, asset);
+						// Goose engine doesnt want this, this generates web font files for each ttf
+						// HTML5Helper.generateWebfonts(project, asset);
 
 						var ext = "." + Path.extension(asset.sourcePath);
 						var source = Path.withoutExtension(asset.sourcePath);
