@@ -3,6 +3,12 @@
 # Place this script inside lime/8,2,2/ (or your current verison)
 # Double click the script to run it 
 
+
+# NOTE: you should be able to do:
+# lime rebuild tools
+# instead of having to use this script. But doing this on the mac
+# rebuils lime.ndll for some reason. This works on windows though.
+
 # Change to the script's own directory
 cd "$(dirname "$0")"
 
