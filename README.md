@@ -1,4 +1,21 @@
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.md) [![Haxelib Version](https://img.shields.io/github/tag/openfl/lime.svg?style=flat&label=haxelib)](http://lib.haxe.org/p/lime) [![Build Status](https://img.shields.io/github/actions/workflow/status/openfl/lime/main.yml?branch=develop)](https://github.com/openfl/lime/actions) [![Community](https://img.shields.io/discourse/posts?color=24afc4&server=https%3A%2F%2Fcommunity.openfl.org&label=community)](https://community.openfl.org/c/lime/19) [![Discord Server](https://img.shields.io/discord/415681294446493696.svg?color=7289da)](https://discordapp.com/invite/tDgq8EE)
+**Goose Version of lime specifics:**
+
+This is our Goose specific fork of Lime. We try not to change things if possible, or if
+we do then if possible do a PR to get the changes into actual lime.
+
+If you want to set up lime initially then see the Google Docs document called:
+Setting up Goose Development
+
+There is a Lime specific version regarding installing and coying binary files from the
+current release (as they are not included in Git).
+
+If you do make changes to lime's haxe code then on windows run:
+lime rebuild tools
+
+(mac has a shell scrip to do this)
+
+= End Goose specifics ===========================================================
+
 
 Lime
 ====
