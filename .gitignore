@@ -9,6 +9,7 @@ ndll/*/*.hash
 ndll/*/*.so
 ndll/*/*.dylib
 ndll/*/*.lib
+ndll/*/*.a
 ndll/*/hl*
 ndll/*/*.dll
 templates/bin/hl/*
