@@ -20,7 +20,7 @@
 		1EEEBAFC121BE2980048A9DF /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EEEBAFB121BE2980048A9DF /* AudioToolbox.framework */; };
 		1EEEBAFE121BE2980048A9DF /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EEEBAFD121BE2980048A9DF /* AVFoundation.framework */; };
 		1EEEBB00121BE2B30048A9DF /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EEEBAFF121BE2B30048A9DF /* Foundation.framework */; };
-		1EF0A83A121ADB8E003F2F59 /* Main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1EF0A839121ADB8E003F2F59 /* Main.mm */; };
+		1EF0A83A121ADB8E003F2F59 /* Main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1EF0A839121ADB8E003F2F59 /* Main.mm */; settings = {COMPILER_FLAGS = "-x objective-c++"; }; };
 		4257533F1A5EFD8C004AA45B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4257533E1A5EFD8C004AA45B /* Images.xcassets */; };
 		6892FA0E263B5BC100EA2669 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6892FA0D263B5BC100EA2669 /* Metal.framework */; };
 		792E75C91C6C876900D01DE0 /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 792E75C81C6C876900D01DE0 /* GameController.framework */; };
