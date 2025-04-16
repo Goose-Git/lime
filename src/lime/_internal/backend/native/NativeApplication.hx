@@ -23,6 +23,7 @@ import lime.ui.KeyCode;
 import lime.ui.KeyModifier;
 import lime.ui.Touch;
 import lime.ui.Window;
+import lime.math.Vector2;
 
 #if !lime_debug
 @:fileXml('tags="haxe,release"')
@@ -59,6 +60,9 @@ class NativeApplication
 	private var windowEventInfo = new WindowEventInfo();
 
 	public var handle:Dynamic;
+	public var mouseX:Int = 0;
+	public var mouseY:Int = 0;
+	private var lastMousePos:Vector2 = new Vector2();
 
 	private var pauseTimer:Int;
 	private var parent:Application;
@@ -325,6 +329,30 @@ class NativeApplication
 
 	private function handleMouseEvent():Void
 	{
+
+		// ----------------------
+        // App-level Mouse Events
+        // ----------------------
+        // Check for App-level mouse events - for mouse events which happen outside of any window
+        if ( mouseEventInfo.windowID == -1 ){
+
+            switch (mouseEventInfo.type)
+			{
+				case MOUSE_DOWN:
+                    parent.onMouseDownGlobal.dispatch( mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button );
+                case MOUSE_UP:
+
+					// BUG
+					// ===
+					// We dont seem to be getting this when we are clicking into a new window for the first time.
+					// See the section below of the hack we use to get around this.
+					//
+					// This might need a look into how C++/SDL is providing these events
+                    parent.onMouseUpGlobal.dispatch( mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button );
+                default:
+            }
+        }
+
 		var window = parent.__windowByID.get(mouseEventInfo.windowID);
 
 		if (window != null)
@@ -338,7 +366,14 @@ class NativeApplication
 
 				case MOUSE_UP:
 					window.clickCount = mouseEventInfo.clickCount;
-					window.onMouseUp.dispatch(mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button);
+					//window.onMouseUp.dispatch(mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button);
+
+					// Mouse Up hack
+					// ===================
+					// 11-07-2024 - Hack to make Mouse Up work when you first click into a window. This does mean 
+					// we're probably getting 2 mouse up events each time - and one with the wrong coordinates.
+					parent.onMouseUpGlobal.dispatch( mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button );
+
 					window.clickCount = 0;
 
 				case MOUSE_MOVE:
@@ -574,6 +609,8 @@ class NativeApplication
 
 	private function updateTimer():Void
 	{
+		updateGlobalMouse();
+
 		#if (lime_cffi && !macro)
 		if (Timer.sRunningTimers.length > 0)
 		{
@@ -621,6 +658,48 @@ class NativeApplication
 		#end
 		#end
 	}
+
+	public function getGlobalMouseX():Int
+	{
+		var x = 0;
+		#if (!macro && lime_cffi)
+		x = NativeCFFI.lime_get_global_mouse_x();
+		#end
+		return x;
+	}
+
+	public function getGlobalMouseY():Int
+	{
+		var y = 0;
+		#if (!macro && lime_cffi)
+		y = NativeCFFI.lime_get_global_mouse_y();
+		#end
+		return y;
+	}
+
+	public function messageBox(title:String, message:String, type:String, iconType:String, buttonType:Int):Int
+	{
+		//return NativeCFFI.lime_messageBox( title, message, type, iconType, buttonType );
+		return 0;
+	}
+
+    private function updateGlobalMouse():Void 
+	{
+		// This will record a global mouse position each frame and also check it against
+    	// the last frame and generate an app-wide MouseMove event in the parent
+    	// Application class (which can be listened for)
+		
+        mouseX = getGlobalMouseX();
+        mouseY = getGlobalMouseY();
+
+        // Check for a global MouseMove message
+        if ( mouseX != lastMousePos.x || mouseY != lastMousePos.y ){
+            lastMousePos.x = mouseX;
+            lastMousePos.y = mouseY;
+            parent.onMouseMoveGlobal.dispatch( mouseX, mouseY );
+        }
+    }
+	
 }
 
 @:keep /*private*/ class ApplicationEventInfo

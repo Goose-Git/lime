@@ -360,6 +360,8 @@ class NativeCFFI
 	@:cffi private static function lime_zlib_compress(data:Dynamic, bytes:Dynamic):Dynamic;
 
 	@:cffi private static function lime_zlib_decompress(data:Dynamic, bytes:Dynamic):Dynamic;
+
+
 	#else
 	private static var lime_application_create = new cpp.Callable<Void->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_application_create", "o", false));
 	private static var lime_application_event_manager_register = new cpp.Callable<cpp.Object->cpp.Object->cpp.Void>(cpp.Prime._loadPrime("lime",
@@ -622,6 +624,12 @@ class NativeCFFI
 		false));
 	private static var lime_zlib_decompress = new cpp.Callable<cpp.Object->cpp.Object->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_zlib_decompress", "ooo",
 		false));
+
+	// GREGDENNESS
+	// C++
+	private static var lime_get_global_mouse_x = new cpp.Callable<Void->Int>(cpp.Prime._loadPrime("lime", "lime_get_global_mouse_x", "i", false));
+	private static var lime_get_global_mouse_y = new cpp.Callable<Void->Int>(cpp.Prime._loadPrime("lime", "lime_get_global_mouse_y", "i", false));
+
 	#end
 	#end
 	#if (neko || cppia)
@@ -776,6 +784,9 @@ class NativeCFFI
 	private static var lime_window_event_manager_register = CFFI.load("lime", "lime_window_event_manager_register", 2);
 	private static var lime_zlib_compress = CFFI.load("lime", "lime_zlib_compress", 2);
 	private static var lime_zlib_decompress = CFFI.load("lime", "lime_zlib_decompress", 2);
+
+	// this is cppia - which we don't use
+
 	#end
 
 	#if hl
@@ -1396,6 +1407,12 @@ class NativeCFFI
 	{
 		return null;
 	}
+
+	// GREGDENNESS
+	// Hashlink
+	@:hlNative("lime", "hl_get_global_mouse_x") private static function lime_get_global_mouse_x():Int { return 0; }
+	@:hlNative("lime", "hl_get_global_mouse_y") private static function lime_get_global_mouse_y():Int { return 0; }
+
 	#end
 	#end
 	#if (lime_cffi && !macro && android)

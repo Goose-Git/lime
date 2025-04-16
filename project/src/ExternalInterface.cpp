@@ -48,6 +48,10 @@
 #include <utils/compress/Zlib.h>
 #include <vm/NekoVM.h>
 
+
+#include <SDL.h>
+
+
 #ifdef HX_WINDOWS
 #include <locale>
 #include <codecvt>
@@ -3394,7 +3398,6 @@ namespace lime {
 
 	}
 
-
 	double lime_window_get_opacity (value window) {
 
 		Window* targetWindow = (Window*)val_data (window);
@@ -3927,6 +3930,42 @@ namespace lime {
 	}
 
 
+	int lime_get_global_mouse_x() {
+
+		int x; int y;
+		SDL_GetGlobalMouseState(&x, &y);
+		return x;
+
+	}
+
+
+	HL_PRIM int HL_NAME(hl_get_global_mouse_x)() {
+
+		int x; int y;
+		SDL_GetGlobalMouseState(&x, &y);
+		return x;
+
+	}
+
+
+	int lime_get_global_mouse_y() {
+
+		int x; int y;
+		SDL_GetGlobalMouseState(&x, &y);
+		return y;
+		
+	}
+
+
+	HL_PRIM int HL_NAME(hl_get_global_mouse_y)() {
+
+		int x; int y;
+		SDL_GetGlobalMouseState(&x, &y);
+		return y;
+
+	}
+
+
 	DEFINE_PRIME0 (lime_application_create);
 	DEFINE_PRIME2v (lime_application_event_manager_register);
 	DEFINE_PRIME1 (lime_application_exec);
@@ -4083,6 +4122,8 @@ namespace lime {
 	DEFINE_PRIME2v (lime_window_set_opacity);
 	DEFINE_PRIME2 (lime_zlib_compress);
 	DEFINE_PRIME2 (lime_zlib_decompress);
+	DEFINE_PRIME0 (lime_get_global_mouse_x);
+	DEFINE_PRIME0 (lime_get_global_mouse_y);
 
 
 	#define _ENUM "?"
@@ -4271,7 +4312,8 @@ namespace lime {
 	DEFINE_HL_PRIM (_VOID, hl_window_set_opacity, _TCFFIPOINTER _F64);
 	DEFINE_HL_PRIM (_TBYTES, hl_zlib_compress, _TBYTES _TBYTES);
 	DEFINE_HL_PRIM (_TBYTES, hl_zlib_decompress, _TBYTES _TBYTES);
-
+	DEFINE_HL_PRIM (_I32, hl_get_global_mouse_x, _NO_ARG);
+	DEFINE_HL_PRIM (_I32, hl_get_global_mouse_y, _NO_ARG);
 
 }
 
