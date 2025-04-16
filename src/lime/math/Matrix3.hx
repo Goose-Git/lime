@@ -1,6 +1,7 @@
 package lime.math;
 
 import lime.utils.Float32Array;
+import lime.utils.ObjectPool;
 
 /**
 	`Matrix3` is a 3x3 transformation matrix particularly useful for
@@ -27,6 +28,11 @@ import lime.utils.Float32Array;
 #end
 abstract Matrix3(Float32Array) to Float32Array
 {
+	// Added - a pooling system for getting temporary objects
+	public static var __pool:ObjectPool<Matrix3> = new ObjectPool<Matrix3>(function() return new Matrix3(),
+		function(r) r.setTo(1,0,0,1,0,0));
+
+
 	/**
 		The matrix a component, used in scaling and skewing (default is 1)
 	**/
@@ -104,6 +110,16 @@ abstract Matrix3(Float32Array) to Float32Array
 		var tx1 = tx * m.a + ty * m.c + m.tx;
 		ty = tx * m.b + ty * m.d + m.ty;
 		tx = tx1;
+	}
+
+	/**
+	 * 	A static way of doing concat, so you dont need to edit any
+	 *  existing matricies.
+	**/
+	public static function concatinate(m1:Matrix3, m2:Matrix3):Matrix3{
+		var res = m1.clone();
+		res.concat( m2 );
+		return res;
 	}
 
 	/**
@@ -498,6 +514,7 @@ abstract Matrix3(Float32Array) to Float32Array
 	**/
 	public function transformRect(rect:Rectangle, result:Rectangle = null):Rectangle
 	{
+		/*
 		if (result == null) result = new Rectangle();
 
 		var tx0 = a * rect.x + c * rect.y;
@@ -530,6 +547,17 @@ abstract Matrix3(Float32Array) to Float32Array
 		if (ty > ty1) ty1 = ty;
 
 		result.setTo(tx0 + tx, ty0 + ty, tx1 - tx0, ty1 - ty0);
+		return result;*/
+
+		// This was changed quite a lot
+
+		if (result == null) result = new Rectangle();
+
+		// This is our code from CFastMatrix - the original Lime code didnt seem to do what I wanted...
+		result.left 	= rect.left * a + rect.top * c + tx;
+		result.top 		= rect.left * b + rect.top * d + ty;
+		result.right 	= rect.right * a + rect.bottom * c + tx;
+		result.bottom 	= rect.right * b + rect.bottom * d + ty;
 		return result;
 	}
 
@@ -541,8 +569,11 @@ abstract Matrix3(Float32Array) to Float32Array
 	public function transformVector(pos:Vector2, result:Vector2 = null):Vector2
 	{
 		if (result == null) result = new Vector2();
-		result.x = pos.x * a + pos.y * c + tx;
-		result.y = pos.x * b + pos.y * d + ty;
+		// Added this, there's a bug here if you pass in the same src and result Vector!
+		var temx 	: Float;
+		temx 		= pos.x * a + pos.y * c + tx;
+		result.y 	= pos.x * b + pos.y * d + ty;
+		result.x	= temx;
 		return result;
 	}
 

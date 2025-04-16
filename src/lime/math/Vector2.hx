@@ -4,6 +4,8 @@ package lime.math;
 import flash.geom.Point;
 #end
 
+import lime.utils.ObjectPool;
+
 /**
 	The `Vector2` class can be used for calculating math with
 	basic (x, y) coordinates
@@ -17,6 +19,9 @@ import flash.geom.Point;
 #end
 class Vector2
 {
+	public static var __pool:ObjectPool<Vector2> = new ObjectPool<Vector2>(function() return new Vector2(),
+		function(r) r.setTo(0, 0));
+
 	/**
 		Gets the length of this vector from (0, 0) to (x, y)
 	**/

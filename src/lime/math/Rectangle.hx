@@ -4,6 +4,8 @@ package lime.math;
 import flash.geom.Rectangle as FlashRectangle;
 #end
 
+import lime.utils.ObjectPool;
+
 /**
 	The `Rectangle` class provides a simple object for storing
 	and manipulating a logical rectangle for calculations
@@ -17,6 +19,11 @@ import flash.geom.Rectangle as FlashRectangle;
 #end
 class Rectangle
 {
+
+	// Added - a pooling system for getting temporary objects
+	public static var __pool:ObjectPool<Rectangle> = new ObjectPool<Rectangle>(function() return new Rectangle(),
+		function(r) r.setTo(0,0,0,0));
+	
 	/**
 		Get or set the bottom (y + height) value of the `Rectangle`
 	**/
@@ -422,6 +429,27 @@ class Rectangle
 		x = p.x;
 		y = p.y;
 		return p.clone();
+	}
+
+	/**
+		Creates a fixed version of this rectangle - if the width or height is a minus value
+		@return	A new `Rectangle` instance
+	**/
+	public function generateFixed():Rectangle
+	{
+		var result = this.clone();
+
+		if ( result.width < 0 ){		
+			result.x = x + result.width;
+			result.width = Math.abs(result.width);
+		}
+
+		if ( result.height < 0 ){		
+			result.y = y + result.height;
+			result.height = Math.abs(result.height);
+		}
+		
+		return result;
 	}
 	
 	@:noCompletion function toString():String
