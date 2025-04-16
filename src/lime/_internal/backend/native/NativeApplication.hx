@@ -391,12 +391,14 @@ class NativeApplication
 
 				case MOUSE_UP:
 					window.clickCount = mouseEventInfo.clickCount;
-					//window.onMouseUp.dispatch(mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button);
+					window.onMouseUp.dispatch(mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button);
 
 					// Mouse Up hack
 					// ===================
 					// 11-07-2024 - Hack to make Mouse Up work when you first click into a window. This does mean 
 					// we're probably getting 2 mouse up events each time - and one with the wrong coordinates.
+					// Update:
+					// I had to leave the above mouseUp on the local window in
 					parent.onMouseUpGlobal.dispatch( mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button );
 
 					window.clickCount = 0;
