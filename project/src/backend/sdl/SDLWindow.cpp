@@ -97,7 +97,6 @@ namespace lime {
 			if (flags & WINDOW_FLAG_ALLOW_HIGHDPI) {
 
 				sdlWindowFlags |= SDL_WINDOW_ALLOW_HIGHDPI;
-
 			}
 
 			#if defined (HX_WINDOWS) && defined (NATIVE_TOOLKIT_SDL_ANGLE)
@@ -662,6 +661,26 @@ namespace lime {
 
 		} else if (context) {
 
+			// This is what we are using
+		
+	#ifdef HX_WINDOWS
+
+			// It appears that DPI awareness doesnt work correctly on Windows platforms as the version of
+			// SDL 2 used is quite old and doesn't work properly with DPI scaling.
+			// See:
+			// https://community.openfl.org/t/android-window-scale-returning-1/14089/4
+
+			float dpi = 0.0f;
+			float scale = 1.0;
+			if (SDL_GetDisplayDPI(0, &dpi, NULL, NULL) == 0) {
+				scale = dpi / 96;
+			}
+			return scale;
+	#else
+			//
+			// This is what is used for android/iOS I guess and that works OK with DPI scaling.
+			// On windows however, this just reports a scale of 1
+			
 			int outputWidth;
 			int outputHeight;
 
@@ -673,8 +692,14 @@ namespace lime {
 			SDL_GetWindowSize (sdlWindow, &width, &height);
 
 			double scale = double (outputWidth) / width;
-			return scale;
 
+			/*
+			printf("Drawable size: %d x %d\n", outputWidth, outputHeight);
+			printf("Window size: %d x %d\n", width, height);
+			printf("Computed scale: %f\n", scale);*/
+			return scale;
+	#endif
+				
 		}
 
 		return 1;
