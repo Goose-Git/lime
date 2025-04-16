@@ -27,7 +27,19 @@ namespace lime {
 	SDL_Cursor* SDLCursor::textCursor = 0;
 	SDL_Cursor* SDLCursor::waitCursor = 0;
 	SDL_Cursor* SDLCursor::waitArrowCursor = 0;
-
+	SDL_Cursor* SDLCursor::spinnerCursor = 0;
+	SDL_Cursor* SDLCursor::dragDropCursor = 0;		
+	SDL_Cursor* SDLCursor::dragDropCopyCursor = 0;
+	SDL_Cursor* SDLCursor::dragDropMoveCursor = 0;
+	SDL_Cursor* SDLCursor::dragDropNoneCursor = 0;
+	SDL_Cursor* SDLCursor::resize_dope = 0;
+	SDL_Cursor* SDLCursor::trans_diag = 0;
+	SDL_Cursor* SDLCursor::trans_horz = 0;
+	SDL_Cursor* SDLCursor::trans_vert = 0;
+	SDL_Cursor* SDLCursor::trans_rotate = 0;
+	SDL_Cursor* SDLCursor::trans_move = 0;
+	SDL_Cursor* SDLCursor::trans_diag2 = 0;
+	
 	static bool displayModeSet = false;
 	static bool FirstContext = true;
 
@@ -789,6 +801,45 @@ namespace lime {
 
 	}
 
+	// taken from https://wiki.libsdl.org/SDL_CreateCursor
+	SDL_Cursor *init_system_cursor(const char *image[]) {
+		//
+		// works with the pre-made hard coded cursors in SDLCursor.h
+		// It would be better if we could have these as separate files
+		// and load them easily in.
+		//
+		int i, row, col;
+		Uint8 data[4*32];
+		Uint8 mask[4*32];
+		int hot_x, hot_y;
+
+		i = -1;
+		for (row=0; row<32; ++row) {
+			for (col=0; col<32; ++col) {
+				if (col % 8) {
+				data[i] <<= 1;
+				mask[i] <<= 1;
+				} else {
+				++i;
+				data[i] = mask[i] = 0;
+				}
+				switch (image[4+row][col]) {
+				case '.':
+					data[i] |= 0x01;
+					mask[i] |= 0x01;
+					break;
+				case 'X':
+					mask[i] |= 0x01;
+					break;
+				case ' ':
+					break;
+				}
+			}
+		}
+		sscanf(image[4+row], "%d,%d", &hot_x, &hot_y);
+		return SDL_CreateCursor(data, mask, 32, 32, hot_x, hot_y);
+	}
+
 
 	void SDLWindow::SetCursor (Cursor cursor) {
 
@@ -914,6 +965,91 @@ namespace lime {
 					}
 
 					SDL_SetCursor (SDLCursor::waitArrowCursor);
+					break;
+
+				// Extra cursors added
+				case SPINNER:		
+					if (!SDLCursor::spinnerCursor) {
+						SDLCursor::spinnerCursor = init_system_cursor ( spinner );
+					}
+					SDL_SetCursor (SDLCursor::spinnerCursor);
+					break;
+
+				case DRAG_DROP:	
+					if (!SDLCursor::dragDropCursor) {
+						SDLCursor::dragDropCursor = init_system_cursor ( dragDrop );
+					}
+					SDL_SetCursor (SDLCursor::dragDropCursor);
+					break;
+ 
+				case DRAG_DROP_COPY:	
+					if (!SDLCursor::dragDropCopyCursor) {
+						SDLCursor::dragDropCopyCursor = init_system_cursor ( dragDropCopy );
+					}
+					SDL_SetCursor (SDLCursor::dragDropCopyCursor);
+					break;
+
+				case DRAG_DROP_MOVE:	
+					if (!SDLCursor::dragDropMoveCursor) {
+						SDLCursor::dragDropMoveCursor = init_system_cursor ( dragDropMove );
+					}
+					SDL_SetCursor (SDLCursor::dragDropMoveCursor);
+					break;
+
+				case DRAG_DROP_NONE:	
+					if (!SDLCursor::dragDropNoneCursor) {
+						SDLCursor::dragDropNoneCursor = init_system_cursor ( dragDropNone );
+					}
+					SDL_SetCursor (SDLCursor::dragDropNoneCursor);
+					break;
+
+				case RESIZE_DOPE:	
+					if (!SDLCursor::resize_dope) {
+						SDLCursor::resize_dope = init_system_cursor ( resize_dope );
+					}
+					SDL_SetCursor (SDLCursor::resize_dope);
+					break;
+
+				case TRANS_DIAG:	
+					if (!SDLCursor::trans_diag) {
+						SDLCursor::trans_diag = init_system_cursor ( trans_diag );
+					}
+					SDL_SetCursor (SDLCursor::trans_diag);
+					break;
+
+				case TRANS_HORZ:	
+					if (!SDLCursor::trans_horz) {
+						SDLCursor::trans_horz = init_system_cursor ( trans_horz );
+					}
+					SDL_SetCursor (SDLCursor::trans_horz);
+					break;
+
+				case TRANS_ROTATE:	
+					if (!SDLCursor::trans_rotate) {
+						SDLCursor::trans_rotate = init_system_cursor ( trans_rotate );
+					}
+					SDL_SetCursor (SDLCursor::trans_rotate);
+					break;
+
+				case TRANS_VERT:	
+					if (!SDLCursor::trans_vert) {
+						SDLCursor::trans_vert = init_system_cursor ( trans_vert );
+					}
+					SDL_SetCursor (SDLCursor::trans_vert);
+					break;
+
+				case TRANS_MOVE:	
+					if (!SDLCursor::trans_move) {
+						SDLCursor::trans_move = init_system_cursor ( trans_move );
+					}
+					SDL_SetCursor (SDLCursor::trans_move);
+					break;
+
+				case TRANS_DIAG2:	
+					if (!SDLCursor::trans_diag2) {
+						SDLCursor::trans_diag2 = init_system_cursor ( trans_diag2 );
+					}
+					SDL_SetCursor (SDLCursor::trans_diag2);
 					break;
 
 				default:
@@ -1148,6 +1284,7 @@ namespace lime {
 		return new SDLWindow (application, width, height, flags, title);
 
 	}
+
 
 
 }
