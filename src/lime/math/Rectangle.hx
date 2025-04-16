@@ -423,4 +423,9 @@ class Rectangle
 		y = p.y;
 		return p.clone();
 	}
+	
+	@:noCompletion function toString():String
+	{
+		return "x=" + x + ", y=" + y + ", w=" + width + ", h=" + height;
+	}
 }

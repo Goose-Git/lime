@@ -1021,15 +1021,17 @@ class Bytes
 			b.getF32(pos);
 	}
 
-	public function setDouble(pos:Int, v:Float):Void
+	public inline function setDouble(pos:Int, v:Float):Void
 	{
-		if (out(pos + 7)) throw Error.OutsideBounds;
+		//if (out(pos + 7)) throw Error.OutsideBounds;
 		b.setF64(pos, v);
 	}
 
-	public function setFloat(pos:Int, v:Float):Void
+	public inline function setFloat(pos:Int, v:Float):Void
 	{
-		if (out(pos + 3)) throw Error.OutsideBounds;
+		// Adding the inline here as this gave a massive boost in speed when calling this a lot
+		// which happens when setting up vertex data
+		//if (out(pos + 3)) throw Error.OutsideBounds;
 		b.setF32(pos, v);
 	}
 
@@ -1055,7 +1057,7 @@ class Bytes
 		return haxe.Int64.make(b.getI32(pos + 4), b.getI32(pos));
 	}
 
-	public function setInt32(pos:Int, v:Int):Void
+	public inline function setInt32(pos:Int, v:Int):Void
 	{
 		if (out(pos + 3)) throw Error.OutsideBounds;
 		b.setI32(pos, v);
