@@ -5,6 +5,7 @@
 #include <system/DisplayMode.h>
 #include <system/JNI.h>
 #include <system/System.h>
+#include <graphics/utils/ImageDataUtil.h>
 
 #ifdef HX_MACOS
 #include <CoreFoundation/CoreFoundation.h>
@@ -80,6 +81,134 @@ namespace lime {
 
 		return (SDL_SetClipboardText (text) == 0);
 
+	}
+
+	void Clipboard::GetImageSize(Rectangle* size){
+		//
+		// Returns the size of the image on the clipboard if there is one or [0,0] if not.
+		// this uses the windows clipboard API and DIB 24bit bitmaps.
+		//
+		size->x = 0;
+		size->y = 0;
+
+		// windows specific clipboard code
+	#if defined (HX_WINDOWS)
+		if (IsClipboardFormatAvailable(CF_DIB)){
+			// There is a DIB in the clipboard - return the size of it
+			GLOBALHANDLE    hGMem;
+			LPBITMAPINFO    lpBI;
+
+			// Note: it seems that this works in HL targets, but on Windows c++
+			// this will not work- it's knows there's something on the clipboard
+			// but it will not read any size from it....
+			//
+			// This kind of breaks things, so it only works in HL atm
+
+			OpenClipboard(NULL);
+			hGMem = GetClipboardData(CF_DIB);
+			lpBI = (LPBITMAPINFO)GlobalLock(hGMem);
+			size->x = lpBI->bmiHeader.biWidth;
+			size->y = lpBI->bmiHeader.biHeight;
+			GlobalUnlock(hGMem);
+			CloseClipboard();
+		}
+	#endif
+	}
+
+
+	void Clipboard::GetImagePixels(Image* dstImage){
+	
+		//
+		// Heres some code I wrote for getting windows DIB bitmaps from the clipboard - this was
+		// very painful - DIB bitmaps RGB data is not in a good format.
+		//
+	#if defined (HX_WINDOWS)
+		// Fill dstImage
+		if (IsClipboardFormatAvailable(CF_DIB)){
+			// a DIB is in the clipboard, draw it out
+			GLOBALHANDLE    hGMem ;
+			LPBITMAPINFO    lpBI ;
+			void*            pDIBBits;
+		
+			OpenClipboard(NULL) ;
+			hGMem = GetClipboardData(CF_DIB) ;
+			lpBI = (LPBITMAPINFO)GlobalLock(hGMem);
+
+			// point to DIB bits after BITMAPINFO object
+			pDIBBits = (void*)(lpBI->bmiColors);
+
+			// DWORD Align
+			// Width bytes across must align to DWORD size (4) for some stupid old ass reason
+			int nbytesAcross = lpBI->bmiHeader.biWidth * 3;
+			int padding = (4 - (nbytesAcross % 4)) % 4;
+
+			// Get the total bytes with padding for DWORD
+			int byteTotal = ((lpBI->bmiHeader.biWidth * 3) + padding) * lpBI->bmiHeader.biHeight;
+
+			// Copy to buffer with padding
+			BYTE* buffer = new BYTE[byteTotal];
+			memcpy( buffer, pDIBBits, byteTotal);
+
+			// Create a buffer with no padding
+			int byteTotalNoPadding = ((lpBI->bmiHeader.biWidth * 3)) * lpBI->bmiHeader.biHeight;
+			BYTE* bufferNoPadding = new BYTE[byteTotalNoPadding];
+			
+			// Copy to the pure RGB buffer that we can use (remove the DWORD Padding)
+			int srcCount = 0;
+			int dstCount = 0;
+			for ( int y = 0; y < lpBI->bmiHeader.biHeight; y++ ){
+				for ( int x = 0; x < lpBI->bmiHeader.biWidth * 3; x++ ){
+					bufferNoPadding[dstCount] = buffer[srcCount];
+					dstCount++;
+					srcCount++;
+				}
+				srcCount+=padding;
+			}			
+
+			// Flip bitmap in Y dimension
+			BYTE* flippedRGBBuffer = new BYTE[byteTotalNoPadding];
+			int width = lpBI->bmiHeader.biWidth;
+			int height = lpBI->bmiHeader.biHeight;
+			int dstY = height-1;
+
+			for ( int y = 0; y < lpBI->bmiHeader.biHeight; y++ ){
+				for ( int x = 0; x < lpBI->bmiHeader.biWidth*3; x++ ){
+					flippedRGBBuffer[x+(dstY*width*3)] = bufferNoPadding[x + (y*width*3)];
+				}
+				dstY--;
+			}	
+
+			// Copy pixels to the actual Image
+			Rectangle rect(0,0,width, height);
+			uint8_t* data = (uint8_t*)dstImage->buffer->data->buffer->b;
+			ImageDataView dataView = ImageDataView (dstImage, &rect);
+			int row;
+			int srcPosition = 0;
+
+			for (int y = 0; y < dataView.height; y++) {
+				row = dataView.Row (y);
+				for (int x = 0; x < dataView.width; x++) {
+					int b = flippedRGBBuffer[srcPosition+0];
+					int g = flippedRGBBuffer[srcPosition+1];
+					int r = flippedRGBBuffer[srcPosition+2];
+					int offset = row + (x * 4);
+					data[offset		] = r;
+					data[offset + 1	] = g;
+					data[offset + 2	] = b;
+					data[offset + 3	] = 255;
+					srcPosition += 3;
+				}
+			}
+			
+			// Cleanup
+			delete [] buffer;
+			delete [] bufferNoPadding;
+			delete [] flippedRGBBuffer;
+			GlobalUnlock(hGMem);
+			CloseClipboard();
+		}
+
+	#endif
 	}
 
 

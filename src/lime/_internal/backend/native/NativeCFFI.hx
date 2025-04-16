@@ -648,6 +648,8 @@ class NativeCFFI
 	// C++
 	private static var lime_get_global_mouse_x = new cpp.Callable<Void->Int>(cpp.Prime._loadPrime("lime", "lime_get_global_mouse_x", "i", false));
 	private static var lime_get_global_mouse_y = new cpp.Callable<Void->Int>(cpp.Prime._loadPrime("lime", "lime_get_global_mouse_y", "i", false));
+	private static var lime_get_clipboard_image_size = new cpp.Callable<cpp.Object->Void>(cpp.Prime._loadPrime("lime", "lime_get_clipboard_image_size", "ov", false));
+	private static var lime_get_clipboard_image_pixels = new cpp.Callable<cpp.Object->Void>(cpp.Prime._loadPrime("lime", "lime_get_clipboard_image_pixels", "ov", false));
 
 	#end
 	#end
@@ -1457,6 +1459,8 @@ class NativeCFFI
 	// Hashlink
 	@:hlNative("lime", "hl_get_global_mouse_x") private static function lime_get_global_mouse_x():Int { return 0; }
 	@:hlNative("lime", "hl_get_global_mouse_y") private static function lime_get_global_mouse_y():Int { return 0; }
+	@:hlNative("lime", "hl_get_clipboard_image_size") private static function lime_get_clipboard_image_size(size:Rectangle):Void {}
+	@:hlNative("lime", "hl_get_clipboard_image_pixels") private static function lime_get_clipboard_image_pixels(image:Image):Void {}
 
 	#end
 	#end

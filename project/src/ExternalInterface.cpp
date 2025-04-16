@@ -4060,6 +4060,38 @@ namespace lime {
 	}
 
 
+	void lime_get_clipboard_image_size (value rect) {
+
+		printf("before BREAK!!!!");
+		Rectangle _rect = Rectangle (rect);
+		Clipboard::GetImageSize( &_rect);
+		printf("after BREAK!!!!");
+
+	}
+
+
+	HL_PRIM void HL_NAME(hl_get_clipboard_image_size) (Rectangle* rect) {	
+
+		Clipboard::GetImageSize(rect);
+
+	}
+
+
+	void lime_get_clipboard_image_pixels (value image) {
+
+		Image _image = Image (image);
+		Clipboard::GetImagePixels( &_image);
+
+	}
+
+
+	HL_PRIM void HL_NAME(hl_get_clipboard_image_pixels)(Image* image) {	
+
+		Clipboard::GetImagePixels(image);
+
+	}
+
+
 	DEFINE_PRIME0 (lime_application_create);
 	DEFINE_PRIME2v (lime_application_event_manager_register);
 	DEFINE_PRIME1 (lime_application_exec);
@@ -4223,6 +4255,8 @@ namespace lime {
 	DEFINE_PRIME2 (lime_zlib_decompress);
 	DEFINE_PRIME0 (lime_get_global_mouse_x);
 	DEFINE_PRIME0 (lime_get_global_mouse_y);
+	DEFINE_PRIME1v (lime_get_clipboard_image_size);
+	DEFINE_PRIME1v (lime_get_clipboard_image_pixels);
 
 
 	#define _ENUM "?"
@@ -4419,6 +4453,8 @@ namespace lime {
 	DEFINE_HL_PRIM (_TBYTES, hl_zlib_decompress, _TBYTES _TBYTES);
 	DEFINE_HL_PRIM (_I32, hl_get_global_mouse_x, _NO_ARG);
 	DEFINE_HL_PRIM (_I32, hl_get_global_mouse_y, _NO_ARG);
+	DEFINE_HL_PRIM( _VOID, hl_get_clipboard_image_size, _TRECTANGLE );
+	DEFINE_HL_PRIM( _VOID, hl_get_clipboard_image_pixels, _TIMAGE );
 
 }
 
