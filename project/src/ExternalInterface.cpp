@@ -3967,12 +3967,9 @@ namespace lime {
 
 
 	void lime_get_clipboard_image_size (value rect) {
-
-		printf("before BREAK!!!!");
+		
 		Rectangle _rect = Rectangle (rect);
 		Clipboard::GetImageSize( &_rect);
-		printf("after BREAK!!!!");
-
 	}
 
 
