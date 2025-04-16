@@ -89,6 +89,15 @@ class Application extends Module
 	**/
 	public var windows(get, null):Array<Window>;
 
+	/** Global mouse coordinates, relative to the top-left of the desktop **/
+	public var mouseX(get, null):Int;
+	public var mouseY(get, null):Int;
+
+    /** Global app-wide MouseMove event for the mouse being anywhere on the screen **/
+    public var onMouseMoveGlobal(default, null) = new Event<Float->Float->Void>();
+    public var onMouseDownGlobal(default, null) = new Event<Float->Float->Int->Void>();
+    public var onMouseUpGlobal(default, null) = new Event<Float->Float->Int->Void>();
+
 	@:noCompletion private var __backend:ApplicationBackend;
 	@:noCompletion private var __preloader:Preloader;
 	@:noCompletion private var __window:Window;
@@ -655,6 +664,25 @@ class Application extends Module
 	@:noCompletion private function get_deviceOrientation():Orientation
 	{
 		return __backend.getDeviceOrientation();
+	}
+	
+	inline function get_mouseX():Int
+	{
+		#if (hl || windows)
+			return __backend.mouseX;
+		#else
+			return 0;
+		#end
+	}
+
+	inline function get_mouseY():Int
+	{
+		#if (hl || windows)
+			return __backend.mouseY;
+		#else
+			return 0;
+		#end
+		
 	}
 }
 

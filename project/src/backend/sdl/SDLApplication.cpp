@@ -872,6 +872,8 @@ namespace lime {
 
 	bool SDLApplication::Update () {
 
+		CheckGlobalMouseEvents();
+		
 		SDL_Event event;
 		event.type = -1;
 
@@ -1005,6 +1007,51 @@ namespace lime {
 
 	}
 
+
+    void SDLApplication::DispatchGlobalMouseEvent( int button, bool pressed ){
+        // The window ID will be -1 for global mouse messages
+        mouseEvent.button = button;
+        mouseEvent.windowID = -1;
+
+        if ( pressed )
+            mouseEvent.type = MOUSE_DOWN;
+        else
+            mouseEvent.type = MOUSE_UP;
+        
+        // Fill mouse event with global coordinates in desktop space
+        int x, y;
+        SDL_GetGlobalMouseState(&x, &y);
+        mouseEvent.x = x;
+        mouseEvent.y = y;
+        MouseEvent::Dispatch (&mouseEvent);
+    }
+
+
+    void SDLApplication::CheckMouseButtonEvent( int nIndex, int buttonCode ){
+        if ( mouseButtonDown[nIndex] == false ){
+            // Button wasn't pressed-  check if it is now
+            if ((GetKeyState(buttonCode) & 0x80) != 0){
+                // Button is down now, it must have just been pressed - MouseDown
+                mouseButtonDown[nIndex] = true;
+                DispatchGlobalMouseEvent( nIndex, true );
+            }
+        }
+        else{
+            // Button was pressed-  check if its not now
+            if ((GetKeyState(buttonCode) & 0x80) == 0){
+                // Button is not down now, it must have just been released - MouseUp
+                mouseButtonDown[nIndex] = false;
+                DispatchGlobalMouseEvent( nIndex, false );
+            }
+        }
+    }
+
+
+    void SDLApplication::CheckGlobalMouseEvents() {
+        CheckMouseButtonEvent(0, VK_LBUTTON );
+        CheckMouseButtonEvent(2, VK_RBUTTON );
+    }
+	
 
 }
 
