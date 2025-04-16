@@ -29,6 +29,7 @@ namespace lime {
 	SDL_Cursor* SDLCursor::waitArrowCursor = 0;
 
 	static bool displayModeSet = false;
+	static bool FirstContext = true;
 
 
 	SDLWindow::SDLWindow (Application* application, int width, int height, int flags, const char* title) {
@@ -146,6 +147,17 @@ namespace lime {
 			}
 
 		}
+#ifdef HX_WINDOWS
+ 
+		// Code Added to make context Sharing work
+		if ( FirstContext ){
+			SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 0);
+			FirstContext = false;
+		}
+		else{
+			SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
+		}
+#endif
 
 		sdlWindow = SDL_CreateWindow (title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, sdlWindowFlags);
 
