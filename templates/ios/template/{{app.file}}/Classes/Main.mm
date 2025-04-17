@@ -8,7 +8,8 @@
 
 ::if SET_FIREBASE_INTEGRATION::
 // Import Firebase (if you want to use Firebase):
-#import <FirebaseCore/FirebaseCore.h>
+#import <GooseLogin/GLogin.h>
+//#import <FirebaseCore/FirebaseCore.h>
 ::end::
 
 // refers to the copy of SDL_uikitappdelegate.h also in goose templates:
@@ -34,7 +35,9 @@
 
 	::if SET_FIREBASE_INTEGRATION::
 		// init Firebase:
-		[FIRApp configure];
+		//[FIRApp configure];
+		GLogin_init(NULL);  // NULL is correct here, not nil
+		
 	::end::
 
 		return ret;
