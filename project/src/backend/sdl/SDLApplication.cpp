@@ -999,6 +999,10 @@ namespace lime {
 
 
     void SDLApplication::DispatchGlobalMouseEvent( int button, bool pressed ){
+		//
+		// Global mouse events - these only work on windows platform
+		// 
+#ifdef HX_WINDOWS
         // The window ID will be -1 for global mouse messages
         mouseEvent.button = button;
         mouseEvent.windowID = -1;
@@ -1014,10 +1018,12 @@ namespace lime {
         mouseEvent.x = x;
         mouseEvent.y = y;
         MouseEvent::Dispatch (&mouseEvent);
+#endif
     }
 
-
     void SDLApplication::CheckMouseButtonEvent( int nIndex, int buttonCode ){
+
+#ifdef HX_WINDOWS
         if ( mouseButtonDown[nIndex] == false ){
             // Button wasn't pressed-  check if it is now
             if ((GetKeyState(buttonCode) & 0x80) != 0){
@@ -1034,12 +1040,14 @@ namespace lime {
                 DispatchGlobalMouseEvent( nIndex, false );
             }
         }
+#endif
     }
 
-
     void SDLApplication::CheckGlobalMouseEvents() {
+#ifdef HX_WINDOWS
         CheckMouseButtonEvent(0, VK_LBUTTON );
         CheckMouseButtonEvent(2, VK_RBUTTON );
+#endif
     }
 	
 
