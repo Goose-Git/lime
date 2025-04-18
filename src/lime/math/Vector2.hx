@@ -22,6 +22,11 @@ class Vector2
 	public static var __pool:ObjectPool<Vector2> = new ObjectPool<Vector2>(function() return new Vector2(),
 		function(r) r.setTo(0, 0));
 
+	public static var Up:Vector2 = new Vector2(0,-1);
+	public static var Down:Vector2 = new Vector2(0,1);
+	public static var Left:Vector2 = new Vector2(-1,0);
+	public static var Right:Vector2 = new Vector2(1,0);
+
 	/**
 		Gets the length of this vector from (0, 0) to (x, y)
 	**/
@@ -182,6 +187,29 @@ class Vector2
 		return result;
 	}
 
+	/**
+		Calculates the distance between this point and an (x,y) point.
+	**/
+	public function distanceToXY(x2:Float, y2:Float ):Float
+	{
+		var dx = x - x2;
+		var dy = y - y2;
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+
+	/**
+		Returns a new vector that is perpendicular to this vector, rotated 90 degrees counter-clockwise.
+		
+		@param	result	Optional result vector to store the output in.
+		@return	A `Vector2` that is perpendicular to this one.
+	**/
+	public function perpendicular(result:Vector2 = null):Vector2
+	{
+		if (result == null) result = new Vector2();
+		result.setTo(y, -x);
+		return result;
+	}
+
 	@:noCompletion private function __toFlashPoint():#if flash Point #else Dynamic #end
 	{
 		#if flash
@@ -201,4 +229,7 @@ class Vector2
 	{
 		return (x * x + y * y);
 	}
+
+	
+	
 }

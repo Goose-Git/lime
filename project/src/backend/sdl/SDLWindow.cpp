@@ -43,6 +43,135 @@ namespace lime {
 	static bool displayModeSet = false;
 	static bool FirstContext = true;
 
+	std::list<Window*> Window::WindowList;
+
+    // ------------------------------------------------------
+    // We added this. This is called by SDL as we are resizing the window so that we can
+    // update the game as we are dragging to resize the window so everything looks smooth.
+    // This has to send messages to the haxe side to re-render the game and update the size
+    // etc... 
+    // ------------------------------------------------------
+#ifdef HX_WINDOWS
+    static int ResizingEventWatcher(void* data, SDL_Event* event)
+    {
+        if (event->type == SDL_WINDOWEVENT &&
+            event->window.event == SDL_WINDOWEVENT_RESIZED) {
+            SDL_Window* win = SDL_GetWindowFromID(event->window.windowID);
+            if (win == (SDL_Window*)data) 
+            {
+                // Tell haxe we are resizing the window so it has the correct size when we render
+                int w, h;
+                SDL_GetWindowSize(win, &w, &h);
+                WindowEvent windowEvent;
+                windowEvent.type =  WINDOW_RESIZE;
+				windowEvent.width = w;
+				windowEvent.height = h;
+                windowEvent.windowID = event->window.windowID;
+                WindowEvent::Dispatch( &windowEvent );
+
+                // Tell Haxe to process the next frame, it needs to do this otherwise you get black screen when resizing
+                ApplicationEvent applicationEvent;
+                applicationEvent.type = UPDATE;
+				applicationEvent.deltaTime = 0.16;
+                ApplicationEvent::Dispatch (&applicationEvent);
+                
+                // This will make it render in haxe
+                RenderEvent renderEvent;
+                renderEvent.type = RENDER;
+                RenderEvent::Dispatch (&renderEvent);                
+            }
+        }
+        return 0;
+    }
+#endif
+
+	// ------------------------------------------------------
+    // We added this. This seems a pretty accurate way in windows to get the size of a thick window frame
+    // ------------------------------------------------------
+	#ifdef HX_WINDOWS
+    void GetWindowBorderSize(SDL_Window *win, RECT* size )
+    {
+        // THIS only works for Windows - there should be a function in SDL Which returns this for the 
+        // correct platform, but this is custom.
+        //
+        // SDL_GetWindowBordersSize looks like it should be the sort of thing, but this just returned 0.
+        //
+        SDL_SysWMinfo wmInfo;
+        SDL_VERSION(&wmInfo.version);
+        SDL_GetWindowWMInfo(win, &wmInfo);
+        HWND hwnd = wmInfo.info.win.window;
+        DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+        DWORD ExStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+        RECT rect;
+        rect.left = 0;
+        rect.top = 0;
+        rect.right = 100;
+        rect.bottom = 100;
+        AdjustWindowRectEx(&rect, style, FALSE, ExStyle);
+        
+        size->left = 0 - rect.left;
+        size->top = 0 - rect.top;
+        size->right = rect.right - 100;
+        size->bottom = rect.bottom - 100;
+    }
+#endif
+
+ 	// ------------------------------------------------------
+    // This is a Non-Client area hit test callback we use for windows which are resizable, but dont have
+	// a border, in which case we need to manually tell it where the sides are */
+    // ------------------------------------------------------
+#ifdef HX_WINDOWS
+    static SDL_HitTestResult SDLCALL
+    HitTestCallbackForChildWindows(SDL_Window *win, const SDL_Point *area, void *data)
+    {
+        // int xframe = GetSystemMetrics(SM_CXSIZEFRAME);  // This is 5
+        RECT borderSize;
+        GetWindowBorderSize( win, &borderSize );
+        // printf("borderSize l=%d, t=%d, r=%d, b=%d\n", borderSize.left, borderSize.top, borderSize.right, borderSize.bottom );
+
+        int w, h;
+        int RESIZE_BORDER = borderSize.left;
+        int DRAGGABLE_TITLE = borderSize.top;
+        //printf("Hit test point %d,%d\n", area->x, area->y);       
+
+        SDL_GetWindowSize(win, &w, &h);
+
+        if (area->x < RESIZE_BORDER) {
+            if (area->y < RESIZE_BORDER) {
+                SDL_Log("SDL_HITTEST_RESIZE_TOPLEFT\n");
+                return SDL_HITTEST_RESIZE_TOPLEFT;
+            } else if (area->y >= (h-RESIZE_BORDER)) {
+                SDL_Log("SDL_HITTEST_RESIZE_BOTTOMLEFT\n");
+                return SDL_HITTEST_RESIZE_BOTTOMLEFT;
+            } else {
+                SDL_Log("SDL_HITTEST_RESIZE_LEFT\n");
+                return SDL_HITTEST_RESIZE_LEFT;
+            }
+        } else if (area->x >= (w-RESIZE_BORDER)) {
+            if (area->y < RESIZE_BORDER) {
+                SDL_Log("SDL_HITTEST_RESIZE_TOPRIGHT\n");
+                return SDL_HITTEST_RESIZE_TOPRIGHT;
+            } else if (area->y >= (h-RESIZE_BORDER)) {
+                SDL_Log("SDL_HITTEST_RESIZE_BOTTOMRIGHT\n");
+                return SDL_HITTEST_RESIZE_BOTTOMRIGHT;
+            } else {
+                SDL_Log("SDL_HITTEST_RESIZE_RIGHT\n");
+                return SDL_HITTEST_RESIZE_RIGHT;
+            }
+        } else if (area->y >= (h-RESIZE_BORDER)) {
+            SDL_Log("SDL_HITTEST_RESIZE_BOTTOM\n");
+            return SDL_HITTEST_RESIZE_BOTTOM;
+        } else if (area->y < RESIZE_BORDER) {
+            SDL_Log("SDL_HITTEST_RESIZE_TOP\n");
+            return SDL_HITTEST_RESIZE_TOP;
+        } else if (area->y < DRAGGABLE_TITLE) {
+            SDL_Log("SDL_HITTEST_DRAGGABLE\n");
+            return SDL_HITTEST_DRAGGABLE;
+        }
+        return SDL_HITTEST_NORMAL;
+    }
+#endif	
+
 
 	SDLWindow::SDLWindow (Application* application, int width, int height, int flags, const char* title, Window* parentWnd ) {
 
@@ -205,6 +334,15 @@ namespace lime {
 
 		}
 
+#ifdef HX_WINDOWS
+        /* Add resize/drag areas for windows that are borderless and resizable */
+        // **********************************************************************
+        if ((sdlWindowFlags & (SDL_WINDOW_RESIZABLE|SDL_WINDOW_BORDERLESS)) ==
+            (SDL_WINDOW_RESIZABLE|SDL_WINDOW_BORDERLESS)) {
+            SDL_SetWindowHitTest( sdlWindow, HitTestCallbackForChildWindows, NULL);
+        }
+#endif
+
 		#if defined (HX_WINDOWS) && !defined (HX_WINRT)
 
 		HINSTANCE handle = ::GetModuleHandle (nullptr);
@@ -330,6 +468,25 @@ namespace lime {
 
 		}
 
+#ifdef HX_WINDOWS
+        // Added this code to render frames while resizing the window, this makes it update nicely and render while
+        // we are actually dragging the window to resize. This seems a bit hacky, but I found at least 2 sources which
+        // recommend doing this.
+        if ( context != NULL ){
+            SDL_SetWindowData(sdlWindow, "SDLWINDOW", this );
+            SDL_AddEventWatch(ResizingEventWatcher, sdlWindow);
+        }    
+
+		// Add to our global list of windows
+		WindowList.push_back(this);
+		printf("SDLWindow::SDLWindow called, new Window list size = %d\n", WindowList.size());
+
+		// Store hWnd
+		SDL_SysWMinfo wmInfo;
+		SDL_VERSION(&wmInfo.version);
+		SDL_GetWindowWMInfo(sdlWindow, &wmInfo);
+		hWnd = (int)wmInfo.info.win.window;
+#endif
 	}
 
 
@@ -351,6 +508,12 @@ namespace lime {
 			SDL_GL_DeleteContext (context);
 
 		}
+
+#ifdef HX_WINDOWS
+		// Remove from our global list of windows
+		WindowList.remove(this);
+		printf("=>SDLWindow::~SDLWindow called, new Window list size = %d\n", WindowList.size() );
+#endif
 
 	}
 
@@ -1317,6 +1480,36 @@ namespace lime {
 		SDL_WarpMouseInWindow (sdlWindow, x, y);
 
 	}
+
+	int SDLWindow::GetBorderThickness() {
+#ifdef HX_WINDOWS
+		RECT borderSize;
+		// TODO - this could be cached...
+		// This works by giving a client rect and saying "how big would the actual window rect need to be for this?"
+		GetWindowBorderSize( sdlWindow, &borderSize );
+
+		// Assume that left, right and bottom are all the same thickness
+		return borderSize.left;
+#endif
+		return 0;
+	}
+	
+	int SDLWindow::GetTitlebarHeight() {
+#ifdef HX_WINDOWS
+		RECT borderSize;
+		GetWindowBorderSize( sdlWindow, &borderSize );
+		return borderSize.top;
+#endif
+		return 0;
+	}
+
+	void SDLWindow::Hide(bool hide) {
+		if ( hide ) 
+			SDL_HideWindow(sdlWindow);
+		else
+			SDL_ShowWindow(sdlWindow);
+	}
+
 
 
 	Window* CreateWindow (Application* application, int width, int height, int flags, const char* title, Window* parentWnd) {

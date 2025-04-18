@@ -46,8 +46,13 @@ class NativeWindow
 	private var displayMode:DisplayMode;
 	private var frameRate:Float;
 	private var mouseLock:Bool;
-	private var parent:Window;
 	private var useHardware:Bool;
+	private var parent:Window;		
+	
+	// if actualParentWnd is set to something then this IS a child window and actualParentWnd is the parent
+	private var actualParentWnd:Window;
+
+
 	#if lime_cairo
 	private var cacheLock:Dynamic;
 	private var cairo:Cairo;
@@ -57,6 +62,7 @@ class NativeWindow
 	public function new(parent:Window, WindowParent:Window)
 	{
 		this.parent = parent;
+		this.actualParentWnd = WindowParent;
 
 		cursor = DEFAULT;
 		displayMode = new DisplayMode(0, 0, 0, 0);
@@ -120,26 +126,17 @@ class NativeWindow
 			parent.__x = NativeCFFI.lime_window_get_x(handle);
 			parent.__y = NativeCFFI.lime_window_get_y(handle);
 
-		
-		
             // Not using this any more
 			//parent.__hidden = (Reflect.hasField(attributes, "hidden") && attributes.hidden);
 
 			parent.id = NativeCFFI.lime_window_get_id(handle);
-           
-			
-			/*
-			parent.__borderThickness = NativeCFFI.lime_window_get_border_thickness(handle);
+            parent.__borderThickness = NativeCFFI.lime_window_get_border_thickness(handle);
             parent.__titlebarHeight = NativeCFFI.lime_window_get_titlebar_height(handle);
             // trace("TITLE BAR THICCCC = "+ parent.__borderThickness );
             
             // Non-resizable dialogs dont have border thickness
             if ( parent.__borderThickness != 0 )
                 parent.storeBorderThicknessGlobally();
-*/
-			
-
-
 		}
 
 		parent.__scale = NativeCFFI.lime_window_get_scale(handle);
@@ -217,6 +214,11 @@ class NativeWindow
 
 	public function close():Void
 	{
+		if ( isChildWindow() ){
+            parent.onClose.dispatch();
+            return;
+        }
+
 		if (!closing)
 		{
 			closing = true;
@@ -757,6 +759,29 @@ class NativeWindow
 		NativeCFFI.lime_window_warp_mouse(handle, x, y);
 		#end
 	}
+
+	public function isChildWindow():Bool
+	{
+		return (actualParentWnd != null);
+	}
+
+	public function hide( hide:Bool = true ) {
+        #if (!macro && lime_cffi)
+        NativeCFFI.lime_window_hide(handle, hide );
+        #end
+    }
+
+    public function getHWnd():Int
+    {
+        if (handle != null)
+        {
+            #if (!macro && lime_cffi)
+            return NativeCFFI.lime_window_get_hwnd(handle);
+            #end
+        }
+        return 0;
+    }
+	
 }
 
 #if (haxe_ver >= 4.0) private enum #else @:enum private #end abstract MouseCursorType(Int) from Int to Int
