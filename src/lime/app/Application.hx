@@ -158,9 +158,9 @@ class Application extends Module
 		Creates a new Window and adds it to the Application
 		@param	attributes	A set of parameters to initialize the window
 	**/
-	public function createWindow(attributes:WindowAttributes):Window
+	public function createWindow(attributes:WindowAttributes, parentWnd:Window = null):Window
 	{
-		var window = __createWindow(attributes);
+		var window = __createWindow(attributes, parentWnd);
 		__addWindow(window);
 		return window;
 	}
@@ -522,9 +522,9 @@ class Application extends Module
 		}
 	}
 
-	@:noCompletion private function __createWindow(attributes:WindowAttributes):Window
+	@:noCompletion private function __createWindow(attributes:WindowAttributes, parentWnd:Window ):Window
 	{
-		var window = new Window(this, attributes);
+		var window = new Window(this, attributes, parentWnd );
 		if (window.id == -1) return null;
 		return window;
 	}

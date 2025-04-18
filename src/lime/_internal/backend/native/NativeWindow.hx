@@ -54,7 +54,7 @@ class NativeWindow
 	private var primarySurface:CairoSurface;
 	#end
 
-	public function new(parent:Window)
+	public function new(parent:Window, WindowParent:Window)
 	{
 		this.parent = parent;
 
@@ -107,7 +107,11 @@ class NativeWindow
 		var height = Reflect.hasField(attributes, "height") ? attributes.height : #if desktop 600 #else 0 #end;
 
 		#if (!macro && lime_cffi)
-		handle = NativeCFFI.lime_window_create(parent.application.__backend.handle, width, height, flags, title);
+
+        if ( WindowParent != null )
+		    handle = NativeCFFI.lime_window_create(parent.application.__backend.handle, width, height, flags, title, WindowParent.__backend.handle );
+        else 
+            handle = NativeCFFI.lime_window_create(parent.application.__backend.handle, width, height, flags, title, null );
 
 		if (handle != null)
 		{
@@ -115,8 +119,27 @@ class NativeWindow
 			parent.__height = NativeCFFI.lime_window_get_height(handle);
 			parent.__x = NativeCFFI.lime_window_get_x(handle);
 			parent.__y = NativeCFFI.lime_window_get_y(handle);
-			parent.__hidden = (Reflect.hasField(attributes, "hidden") && attributes.hidden);
+
+		
+		
+            // Not using this any more
+			//parent.__hidden = (Reflect.hasField(attributes, "hidden") && attributes.hidden);
+
 			parent.id = NativeCFFI.lime_window_get_id(handle);
+           
+			
+			/*
+			parent.__borderThickness = NativeCFFI.lime_window_get_border_thickness(handle);
+            parent.__titlebarHeight = NativeCFFI.lime_window_get_titlebar_height(handle);
+            // trace("TITLE BAR THICCCC = "+ parent.__borderThickness );
+            
+            // Non-resizable dialogs dont have border thickness
+            if ( parent.__borderThickness != 0 )
+                parent.storeBorderThicknessGlobally();
+*/
+			
+
+
 		}
 
 		parent.__scale = NativeCFFI.lime_window_get_scale(handle);

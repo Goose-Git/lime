@@ -44,7 +44,7 @@ namespace lime {
 	static bool FirstContext = true;
 
 
-	SDLWindow::SDLWindow (Application* application, int width, int height, int flags, const char* title) {
+	SDLWindow::SDLWindow (Application* application, int width, int height, int flags, const char* title, Window* parentWnd ) {
 
 		sdlTexture = 0;
 		sdlRenderer = 0;
@@ -66,7 +66,8 @@ namespace lime {
 		if (flags & WINDOW_FLAG_MAXIMIZED) sdlWindowFlags |= SDL_WINDOW_MAXIMIZED;
 
 		#ifndef EMSCRIPTEN
-		if (flags & WINDOW_FLAG_ALWAYS_ON_TOP) sdlWindowFlags |= SDL_WINDOW_ALWAYS_ON_TOP;
+		if (flags & WINDOW_FLAG_ALWAYS_ON_TOP) 
+            sdlWindowFlags |= SDL_WINDOW_ALWAYS_ON_TOP;
 		#endif
 
 		#if defined (HX_WINDOWS) && defined (NATIVE_TOOLKIT_SDL_ANGLE) && !defined (HX_WINRT)
@@ -158,9 +159,11 @@ namespace lime {
 			}
 
 		}
+
 #ifdef HX_WINDOWS
- 
-		// Code Added to make context Sharing work
+		// GREGDENNESS
+		// **********************************************************************
+		// **** Code Added to make context Sharing work *****
 		if ( FirstContext ){
 			SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 0);
 			FirstContext = false;
@@ -168,8 +171,20 @@ namespace lime {
 		else{
 			SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
 		}
+
+        // Set the Parent window if passed in this allows for Child windows
+        // **********************************************************************
+        SDL_Window* sdl_window_parent = NULL;
+        if ( parentWnd != NULL ){
+            SDLWindow* pParentWndSDL = (SDLWindow*)parentWnd;
+            sdl_window_parent = pParentWndSDL->sdlWindow;
+        }
+        SDL_PreSetParentWindow(sdl_window_parent);
 #endif
 
+		// THIS ACTUALLY CREATES THE WINDOW
+        // See SDL_video.c
+        // SDL_windowswindow.c
 		sdlWindow = SDL_CreateWindow (title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, sdlWindowFlags);
 
 		#if defined (IPHONE) || defined (APPLETV)
@@ -1304,9 +1319,9 @@ namespace lime {
 	}
 
 
-	Window* CreateWindow (Application* application, int width, int height, int flags, const char* title) {
+	Window* CreateWindow (Application* application, int width, int height, int flags, const char* title, Window* parentWnd) {
 
-		return new SDLWindow (application, width, height, flags, title);
+		return new SDLWindow (application, width, height, flags, title, parentWnd );
 
 	}
 
