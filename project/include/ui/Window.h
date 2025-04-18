@@ -65,7 +65,7 @@ namespace lime {
 			virtual const char* SetTitle (const char* title) = 0;
 			virtual bool SetVisible (bool visible) = 0;
 			virtual void WarpMouse (int x, int y) = 0;
-
+	
 			Application* currentApplication;
 			int flags;
 
@@ -73,7 +73,7 @@ namespace lime {
 	};
 
 
-	Window* CreateWindow (Application* application, int width, int height, int flags, const char* title);
+	Window* CreateWindow (Application* application, int width, int height, int flags, const char* title, Window* parentWnd);
 
 
 	enum WindowFlags {

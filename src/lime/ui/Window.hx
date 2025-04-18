@@ -157,7 +157,7 @@ class Window
 	}
 	#end
 
-	@:noCompletion private function new(application:Application, attributes:WindowAttributes)
+	@:noCompletion private function new(application:Application, attributes:WindowAttributes, parentWnd:Window )
 	{
 		this.application = application;
 		__attributes = attributes != null ? attributes : {};
@@ -173,8 +173,20 @@ class Window
 		__title = Reflect.hasField(__attributes, "title") ? __attributes.title : "";
 		id = -1;
 
-		__backend = new WindowBackend(this);
+		// GameStudio style apps pass a second parameter here, other platforms dont need this
+	#if (hl || windows)
+		__backend = new WindowBackend(this, parentWnd );
+	#else
+		__backend = new WindowBackend(this, null );
+	#end
 
+/* PUT IN FUTURE
+		__hidden = false;
+
+	#if (hl || windows)
+		hwnd = __backend.getHWnd();
+	#end
+*/
 		#if windows
 		var mappings = [
 

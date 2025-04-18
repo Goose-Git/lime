@@ -3234,17 +3234,26 @@ namespace lime {
 	}
 
 
-	value lime_window_create (value application, int width, int height, int flags, HxString title) {
+	value lime_window_create (value application, int width, int height, int flags, HxString title, value parentWnd ) {
 
-		Window* window = CreateWindow ((Application*)val_data (application), width, height, flags, hxs_utf8 (title, nullptr));
+        Window* targetParentWnd = NULL;
+
+        if ( parentWnd != NULL )
+            targetParentWnd = (Window*)val_data (parentWnd);
+
+		Window* window = CreateWindow ((Application*)val_data (application), width, height, flags, title.c_str (), targetParentWnd );
 		return CFFIPointer (window, gc_window);
-
 	}
 
 
-	HL_PRIM HL_CFFIPointer* HL_NAME(hl_window_create) (HL_CFFIPointer* application, int width, int height, int flags, hl_vstring* title) {
+	HL_PRIM HL_CFFIPointer* HL_NAME(hl_window_create) (HL_CFFIPointer* application, int width, int height, int flags, hl_vstring* title, HL_CFFIPointer* parentWnd) {
 
-		Window* window = CreateWindow ((Application*)application->ptr, width, height, flags, (const char*)hl_to_utf8 ((const uchar*)title->bytes));
+		Window* targetParentWnd = NULL;
+
+        if ( parentWnd != NULL )
+            targetParentWnd = (Window*)parentWnd->ptr;
+
+		Window* window = CreateWindow ((Application*)application->ptr, width, height, flags, (const char*)hl_to_utf8 ((const uchar*)title->bytes), targetParentWnd );
 		return HLCFFIPointer (window, (hl_finalizer)hl_gc_window);
 
 	}
@@ -4113,7 +4122,7 @@ namespace lime {
 	DEFINE_PRIME1 (lime_window_context_lock);
 	DEFINE_PRIME1v (lime_window_context_make_current);
 	DEFINE_PRIME1v (lime_window_context_unlock);
-	DEFINE_PRIME5 (lime_window_create);
+	DEFINE_PRIME6 (lime_window_create);
 	DEFINE_PRIME2v (lime_window_event_manager_register);
 	DEFINE_PRIME1v (lime_window_focus);
 	DEFINE_PRIME1 (lime_window_get_context);
@@ -4305,7 +4314,7 @@ namespace lime {
 	DEFINE_HL_PRIM (_DYN, hl_window_context_lock, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_VOID, hl_window_context_make_current, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_VOID, hl_window_context_unlock, _TCFFIPOINTER);
-	DEFINE_HL_PRIM (_TCFFIPOINTER, hl_window_create, _TCFFIPOINTER _I32 _I32 _I32 _STRING);
+	DEFINE_HL_PRIM (_TCFFIPOINTER, hl_window_create, _TCFFIPOINTER _I32 _I32 _I32 _STRING _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_VOID, hl_window_event_manager_register, _FUN (_VOID, _NO_ARG) _TWINDOW_EVENT);
 	DEFINE_HL_PRIM (_VOID, hl_window_focus, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_F64, hl_window_get_context, _TCFFIPOINTER);

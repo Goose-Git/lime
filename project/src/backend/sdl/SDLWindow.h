@@ -15,7 +15,7 @@ namespace lime {
 
 		public:
 
-			SDLWindow (Application* application, int width, int height, int flags, const char* title);
+			SDLWindow (Application* application, int width, int height, int flags, const char* title, Window* parentWnd );
 			~SDLWindow ();
 
 			virtual void Alert (const char* message, const char* title);
