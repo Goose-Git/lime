@@ -4097,6 +4097,170 @@ namespace lime {
 
 	}
 
+	int lime_window_get_border_thickness (value window) {
+
+		Window* targetWindow = (Window*)val_data (window);
+		return targetWindow->GetBorderThickness ();
+
+	}
+
+	HL_PRIM int HL_NAME(hl_window_get_border_thickness) (HL_CFFIPointer* window) {
+
+		Window* targetWindow = (Window*)window->ptr;
+		return targetWindow->GetBorderThickness ();
+
+	}
+
+    int lime_window_get_titlebar_height (value window) {
+
+		Window* targetWindow = (Window*)val_data (window);
+		return targetWindow->GetTitlebarHeight ();
+
+	}
+
+	HL_PRIM int HL_NAME(hl_window_get_titlebar_height) (HL_CFFIPointer* window) {
+
+		Window* targetWindow = (Window*)window->ptr;
+		return targetWindow->GetTitlebarHeight ();
+
+	}
+
+	void lime_window_hide(value window, bool hide) {
+
+		Window* targetWindow = (Window*)val_data(window);
+		targetWindow->Hide(hide);
+
+	}
+
+	HL_PRIM void HL_NAME(hl_window_hide)(HL_CFFIPointer* window, bool hide) {
+
+		Window* targetWindow = (Window*)window->ptr;
+		targetWindow->Hide(hide);
+
+	}
+
+	int lime_window_get_hwnd(value window) {
+
+		Window* targetWindow = (Window*)val_data(window);
+		return targetWindow->hWnd;
+
+	}
+
+
+	HL_PRIM int HL_NAME(hl_window_get_hwnd)(HL_CFFIPointer* window) {
+
+		Window* targetWindow = (Window*)window->ptr;
+		return targetWindow->hWnd;
+
+	}
+
+	static int id_hwnd_array;
+	static bool init = false;
+
+	// ------------------------------------------------------
+	// Name: get_hwnd_depth_list (Windows)
+	// ------------------------------------------------------
+	value lime_get_hwnd_depth_list(int parentHWnd)
+	{
+		// === Look at SDLSystem.cpp - GetDisplay === that shows how to do it for cffi
+
+		if (!init) {
+			id_hwnd_array = val_id("hwnd_array");
+			init = true;
+		}
+
+		parentHWnd = 0;
+		int numWindows = Window::WindowList.size();
+
+		//printf("************** Windows in list = %d\n", numWindows);
+
+		value list_result = alloc_empty_object();
+		value hwnd_array = alloc_array(numWindows);
+
+		std::list<Window*>::iterator it;
+		HWND curWnd = GetTopWindow((HWND)parentHWnd);
+		HWND topWnd = curWnd;
+
+		curWnd = topWnd;
+		int hwndInList = 0;
+		while (curWnd != NULL) {
+			curWnd = GetNextWindow(curWnd, GW_HWNDNEXT);
+
+			// is this curWnd in our list of windows?
+			for (it = Window::WindowList.begin(); it != Window::WindowList.end(); it++)
+			{
+				if ((int)curWnd == (*it)->hWnd) {
+					
+					//val_array_set_i(hwnd_array, hwndInList, (value)((int)curWnd));
+
+					val_array_set_i(hwnd_array, hwndInList, alloc_int((int)curWnd) );
+					hwndInList++;
+					//printf("matched 1 window to %d\n", (int)curWnd);
+					break;
+				}
+			}
+
+			if (hwndInList >= numWindows)
+				break;
+		}
+
+		alloc_field(list_result, id_hwnd_array, hwnd_array);
+		return list_result;
+	}
+	
+	// ------------------------------------------------------
+	// Name: get_hwnd_depth_list (HashLink)
+	// ------------------------------------------------------
+	HL_PRIM vdynamic* HL_NAME(hl_get_hwnd_depth_list)(int parentHWnd)
+	{
+		parentHWnd = 0;
+
+		// Go through all windows and create an array of HWNDs we can return
+		//============================
+		const int id_hwnd = hl_hash_utf8("hwnd");
+		const int id_hwndList = hl_hash_utf8("hwndList");
+
+		int numWindows = Window::WindowList.size();
+
+		// Create the result set object
+		vdynamic* list_result = (vdynamic*)hl_alloc_dynobj();
+
+		// --- Create array of hwnds - one for each window in our program ---
+		hl_varray* hwnd_array = (hl_varray*)hl_alloc_array(&hlt_dynobj, numWindows);
+		vdynamic** hwnd_array_data = hl_aptr(hwnd_array, vdynamic*);
+		hl_dyn_setp(list_result, id_hwndList, &hlt_array, hwnd_array);
+
+		std::list<Window*>::iterator it;
+		HWND curWnd = GetTopWindow((HWND)parentHWnd);
+		HWND topWnd = curWnd;
+
+		curWnd = topWnd;
+		int hwndInList = 0;
+		while (curWnd != NULL) {
+			curWnd = GetNextWindow(curWnd, GW_HWNDNEXT);
+
+			// is this curWnd in our list of windows?
+			for (it = Window::WindowList.begin(); it != Window::WindowList.end(); it++)
+			{
+				if ((int)curWnd == (*it)->hWnd) {
+					// We have a match for one of our windows
+					// Do the HL dynamic stuff
+					vdynamic* _field = (vdynamic*)hl_alloc_dynobj();
+					hl_dyn_seti(_field, id_hwnd, &hlt_i32, (int)curWnd);
+					*hwnd_array_data++ = _field;
+					hwndInList++;
+					// printf("matched 1 window to %d\n", (int)curWnd);
+					break;
+				}
+			}
+
+			if (hwndInList >= numWindows)
+				break;
+		}
+
+		return list_result;
+	}
+
 
 	DEFINE_PRIME0 (lime_application_create);
 	DEFINE_PRIME2v (lime_application_event_manager_register);
@@ -4263,6 +4427,11 @@ namespace lime {
 	DEFINE_PRIME0 (lime_get_global_mouse_y);
 	DEFINE_PRIME1v (lime_get_clipboard_image_size);
 	DEFINE_PRIME1v (lime_get_clipboard_image_pixels);
+	DEFINE_PRIME1 (lime_window_get_border_thickness);   
+	DEFINE_PRIME1 (lime_window_get_titlebar_height);    
+	DEFINE_PRIME2v (lime_window_hide);
+	DEFINE_PRIME1 (lime_window_get_hwnd);
+	DEFINE_PRIME1 (lime_get_hwnd_depth_list);
 
 
 	#define _ENUM "?"
@@ -4461,7 +4630,11 @@ namespace lime {
 	DEFINE_HL_PRIM (_I32, hl_get_global_mouse_y, _NO_ARG);
 	DEFINE_HL_PRIM( _VOID, hl_get_clipboard_image_size, _TRECTANGLE );
 	DEFINE_HL_PRIM( _VOID, hl_get_clipboard_image_pixels, _TIMAGE );
-
+	DEFINE_HL_PRIM (_I32, hl_window_get_border_thickness, _TCFFIPOINTER);         
+	DEFINE_HL_PRIM (_I32, hl_window_get_titlebar_height, _TCFFIPOINTER); 
+	DEFINE_HL_PRIM (_VOID, hl_window_hide, _TCFFIPOINTER _BOOL);
+	DEFINE_HL_PRIM( _I32, hl_window_get_hwnd, _TCFFIPOINTER);
+	DEFINE_HL_PRIM( _DYN, hl_get_hwnd_depth_list, _I32);
 }
 
 

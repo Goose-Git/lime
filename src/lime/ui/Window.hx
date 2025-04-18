@@ -34,6 +34,16 @@ class Window
 	public var cursor(get, set):MouseCursor;
 	public var display(get, null):Display;
 	public var displayMode(get, set):DisplayMode;
+	public var borderThickness(get, null):Int;      
+	public var titlebarHeight(get, null):Int;       
+	public var hwnd:Int;                           
+
+    // Global values for these since I dont think they should change
+    public static var BORDER_THICKNESS : Int;
+    public static var TITLEBAR_HEIGHT : Int;
+
+
+
 	#if (!lime_doc_gen || (js && html5))
 	public var element(default, null):#if (js && html5) Element #else Dynamic #end;
 	#end
@@ -124,6 +134,9 @@ class Window
 	@:noCompletion private var __minHeight:Int = 0;
 	@:noCompletion private var __maxWidth:Int = 0x7FFFFFFF;
 	@:noCompletion private var __maxHeight:Int = 0x7FFFFFFF;
+	@:noCompletion private var __borderThickness:Int;
+	@:noCompletion private var __titlebarHeight:Int;
+	@:noCompletion private var __opacity:Float;
 
 	#if commonjs
 	private static function __init__()
@@ -185,14 +198,12 @@ class Window
 	#else
 		__backend = new WindowBackend(this, null );
 	#end
-
-/* PUT IN FUTURE
 		__hidden = false;
 
 	#if (hl || windows)
 		hwnd = __backend.getHWnd();
 	#end
-*/
+
 		#if windows
 		var mappings = [
 
@@ -584,6 +595,11 @@ class Window
 	@:noCompletion private inline function set_maximized(value:Bool):Bool
 	{
 		__minimized = false;
+
+		// Added this to fix bug since setting setMaximized below will cause an update() to fire and in that update
+        // we want to be able to query if this window is 'going to be' maximised. 
+        __maximized = value;  
+		
 		return __maximized = __backend.setMaximized(value);
 	}
 
@@ -641,7 +657,7 @@ class Window
 		__backend.setMouseLock(value);
 		return value;
 	}
-
+/*
 	@:noCompletion private function get_opacity():Float
 	{
 		return __backend.getOpacity();
@@ -651,7 +667,7 @@ class Window
 	{
 		__backend.setOpacity(value);
 		return value;
-	}
+	}*/
 
 	@:noCompletion private inline function get_resizable():Bool
 	{
@@ -737,6 +753,51 @@ class Window
 		move(__x, value);
 		return __y;
 	}
+
+	@:noCompletion private inline function get_opacity():Float
+	{
+		return __opacity;
+	}
+
+	@:noCompletion private function set_opacity(value:Float):Float
+	{
+	#if (hl || windows) 
+		__backend.setOpacity(value);
+	#end
+		__opacity = value;
+		return __opacity;
+	}    
+
+	public function isChildWindow():Bool
+	{
+		#if (hl || windows)
+		return __backend.isChildWindow();
+		#end
+		return false;
+	}
+
+	public function storeBorderThicknessGlobally() {
+        BORDER_THICKNESS = __borderThickness;
+        TITLEBAR_HEIGHT = __titlebarHeight;
+    }
+
+	@:noCompletion private inline function get_borderThickness():Int
+	{
+		return BORDER_THICKNESS;
+	}
+
+	@:noCompletion private inline function get_titlebarHeight():Int
+	{
+		return TITLEBAR_HEIGHT;
+	}
+
+	public function Hide( hide:Bool = true ) {
+        __hidden = hide;
+		#if (hl || windows)
+        __backend.hide( __hidden );
+		#end
+    }
+
 }
 
 #if air

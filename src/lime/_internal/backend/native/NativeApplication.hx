@@ -217,7 +217,14 @@ class NativeApplication
 	{
 		for (window in parent.windows)
 		{
+			// Do not process events for hidden windows
+            if ( window.hidden)
+                continue;
+
 			window.onDropFile.dispatch(CFFI.stringValue(dropEventInfo.file));
+
+			// This was in GS code
+			// window.onDropFile.dispatch(#if hl @:privateAccess String.fromUTF8(dropEventInfo.file) #else dropEventInfo.file #end);
 		}
 	}
 
@@ -279,6 +286,10 @@ class NativeApplication
 
 		if (window != null)
 		{
+			// Do not process events for hidden windows
+			if ( window.hidden)
+				return;
+
 			var type:KeyEventType = keyEventInfo.type;
 			var int32:Float = keyEventInfo.keyCode;
 			var keyCode:KeyCode = Std.int(int32);
@@ -380,7 +391,7 @@ class NativeApplication
 
 		var window = parent.__windowByID.get(mouseEventInfo.windowID);
 
-		if (window != null)
+		if (window != null && !window.hidden)
 		{
 			switch (mouseEventInfo.type)
 			{
@@ -445,6 +456,10 @@ class NativeApplication
 			if (window == null) continue;
 
 			// parent.renderer = renderer;
+
+			// Do not process events for hidden windows
+            if ( window.hidden)
+                continue;
 
 			switch (renderEventInfo.type)
 			{

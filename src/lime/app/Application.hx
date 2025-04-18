@@ -628,7 +628,9 @@ class Application extends Module
 			onWindowClose();
 		}
 
-		__removeWindow(window);
+		// Added this - dont remove child windows
+        if ( window.isChildWindow() == false )
+		    __removeWindow(window);
 	}
 
 	@:noCompletion private override function __unregisterLimeModule(application:Application):Void

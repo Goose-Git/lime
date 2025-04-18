@@ -83,6 +83,9 @@ namespace lime {
 
 		}
 
+		for ( int n = 0; n < 3; n++ )
+            mouseButtonDown[n] = false;
+
 		CFRelease (resourcesURL);
 		#endif
 
