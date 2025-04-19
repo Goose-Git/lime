@@ -232,8 +232,10 @@ class FileDialog
 			{
 				try
 				{
-					var data = File.getBytes(path);
-					onOpen.dispatch(data);
+					// This was sending back the contents of the file... but we just want the 
+                    // file path...
+					//var data = File.getBytes(path);
+					onOpen.dispatch( path);
 					return;
 				}
 				catch (e:Dynamic) {}

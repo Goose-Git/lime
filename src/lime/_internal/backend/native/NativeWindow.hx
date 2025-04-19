@@ -132,7 +132,6 @@ class NativeWindow
 			parent.id = NativeCFFI.lime_window_get_id(handle);
             parent.__borderThickness = NativeCFFI.lime_window_get_border_thickness(handle);
             parent.__titlebarHeight = NativeCFFI.lime_window_get_titlebar_height(handle);
-            // trace("TITLE BAR THICCCC = "+ parent.__borderThickness );
             
             // Non-resizable dialogs dont have border thickness
             if ( parent.__borderThickness != 0 )
@@ -781,6 +780,31 @@ class NativeWindow
         }
         return 0;
     }
+
+	public function getHWndDepthList():Array<Int>
+	{
+		// This doesnt work for some reason...
+		//var parentWnd = ( actualParentWnd == null ) ? parent.hwnd : actualParentWnd.hwnd;
+
+		var parentWnd = 0;
+		var hwndList:Array<Int> = [];
+
+#if (!macro && lime_cffi)
+		#if hl
+		var fields:hl.NativeArray<Dynamic> = NativeCFFI.lime_get_hwnd_depth_list( parentWnd ).hwndList;
+		for ( field in fields )
+			if ( field != null )
+				hwndList.push( field.hwnd );
+
+		#else
+		var fields:Array<Dynamic> = NativeCFFI.lime_get_hwnd_depth_list( parentWnd ).hwnd_array;  
+		for ( field in fields )
+			if ( field != null )
+				hwndList.push( field );
+		#end
+#end       
+		return hwndList;
+	}
 	
 }
 

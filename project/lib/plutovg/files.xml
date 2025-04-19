@@ -1,0 +1,15 @@
+<xml>
+	<files id="native-toolkit-plutovg" >
+		<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/plutovg" />
+		<compilerflag value="-DPACKAGE=plutovg" />
+		<file name="${NATIVE_TOOLKIT_PATH}/plutovg/plutovg.c" />
+		<file name="${NATIVE_TOOLKIT_PATH}/plutovg/plutovg-paint.c" />
+		<file name="${NATIVE_TOOLKIT_PATH}/plutovg/plutovg-geometry.c" />
+		<file name="${NATIVE_TOOLKIT_PATH}/plutovg/plutovg-blend.c" />
+		<file name="${NATIVE_TOOLKIT_PATH}/plutovg/plutovg-rle.c" />
+		<file name="${NATIVE_TOOLKIT_PATH}/plutovg/plutovg-dash.c" />
+		<file name="${NATIVE_TOOLKIT_PATH}/plutovg/plutovg-ft-raster.c" />
+		<file name="${NATIVE_TOOLKIT_PATH}/plutovg/plutovg-ft-stroker.c" />
+		<file name="${NATIVE_TOOLKIT_PATH}/plutovg/plutovg-ft-math.c" />
+	</files>
+</xml>

@@ -132,6 +132,14 @@ class BackgroundWorker
 		if (!canceled)
 		{
 			canceled = true;
+
+			// Greg 18-Feb-2022 - had to add this for HL - otherwise it was returning chinese chars
+			// Saw this fix in Font.hx when it gets the family name, it has to convert
+			#if hl
+				if ( message != null )
+					message = @:privateAccess String.fromUTF8(message);
+			#end
+
 			onComplete.dispatch(message);
 		}
 		#end
