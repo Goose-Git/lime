@@ -1,8 +1,5 @@
 package lime.math;
 
-#if flash
-import flash.geom.Rectangle as FlashRectangle;
-#end
 
 import lime.utils.ObjectPool;
 
@@ -78,6 +75,14 @@ class Rectangle
 		Get or set the y of the rectangle
 	**/
 	public var y:Float;
+
+	public var midLeft(get, never):Vector2;
+	public var midRight(get, never):Vector2;
+	public var midTop(get, never):Vector2;
+	public var midBottom(get, never):Vector2;
+	public var center(get, never):Vector2;
+	public var centerX(get, set):Float;
+	public var centerY(get, set):Float;
 
 	/**
 		Create a new `Rectangle` instance
@@ -255,15 +260,6 @@ class Rectangle
 	}
 
 	/**
-		Whether this rectangle is empty
-		@return	`true` if the width or height is <= 0
-	**/
-	public function isEmpty():Bool
-	{
-		return (width <= 0 || height <= 0);
-	}
-
-	/**
 		Moves the rectangle by offset x and values
 		@param	dx	A delta x value
 		@param	dy	A delta y value
@@ -339,16 +335,38 @@ class Rectangle
 		return result;
 	}
 
-	@:noCompletion private function __toFlashRectangle():#if flash FlashRectangle #else Dynamic #end
-	{
-		#if flash
-		return new FlashRectangle(x, y, width, height);
-		#else
-		return null;
-		#end
-	}
+    /** 
+        Scales the whole rectangle by a scalar amount, good for DPI aware scaling of things
+        @param scalar - The amount to multiply the whole rectangle by.
+    **/
+	public function scale( scalar:Float ){
+        x *= scalar;
+        y *= scalar;
+        width *= scalar;
+        height *= scalar;
+    }
 
-	// Getters & Setters
+    /** 
+        The opposite of the scale function.
+    **/
+	public function unscale( scalar:Float ){
+        x /= scalar;
+        y /= scalar;
+        width /= scalar;
+        height /= scalar;
+    }
+
+	/**
+		Whether this rectangle is empty
+		@return	`true` if the width or height is <= 0
+	**/
+	public #if INLINE_ON inline #end function isEmpty():Bool
+	{
+		return (width <= 0 || height <= 0);
+	}
+ 
+	// --------- Getters & Setters ------------------------------------------------------------------
+
 	@:noCompletion private function get_bottom():Float
 	{
 		return y + height;
@@ -431,6 +449,52 @@ class Rectangle
 		return p.clone();
 	}
 
+	@:noCompletion #if INLINE_ON inline #end private function get_midLeft():Vector2
+	{
+		return new Vector2(x, y + height/2);
+	}
+
+	@:noCompletion #if INLINE_ON inline #end private function get_midRight():Vector2
+	{
+		return new Vector2(x+width, y + height/2);
+	}
+
+	@:noCompletion #if INLINE_ON inline #end private function get_midTop():Vector2
+	{
+		return new Vector2(x+width/2, y);
+	}
+
+	@:noCompletion #if INLINE_ON inline #end private function get_midBottom():Vector2
+	{
+		return new Vector2(x+width/2, y+height);
+	}
+
+	@:noCompletion #if INLINE_ON inline #end private function get_center():Vector2
+	{
+		return new Vector2(x+width/2, y+height/2);
+	}
+
+	@:noCompletion #if INLINE_ON inline #end private function get_centerX():Float
+	{
+		return x+width/2;
+	}
+	@:noCompletion #if INLINE_ON inline #end private function get_centerY():Float
+	{
+		return y+height/2;
+	}
+
+	@:noCompletion #if INLINE_ON inline #end private function set_centerX(val:Float):Float
+	{
+		x = val-width/2;
+		return val;
+	}
+
+	@:noCompletion #if INLINE_ON inline #end private function set_centerY(val:Float):Float
+	{
+		y = val-height/2;
+		return val;
+	}
+
 	/**
 		Creates a fixed version of this rectangle - if the width or height is a minus value
 		@return	A new `Rectangle` instance
@@ -450,6 +514,15 @@ class Rectangle
 		}
 		
 		return result;
+	}
+
+	@:noCompletion private function __toFlashRectangle():#if flash FlashRectangle #else Dynamic #end
+	{
+		#if flash
+		return new FlashRectangle(x, y, width, height);
+		#else
+		return null;
+		#end
 	}
 	
 	@:noCompletion function toString():String

@@ -343,7 +343,7 @@ namespace lime {
         }
 #endif
 
-		#if defined (HX_WINDOWS) && !defined (HX_WINRT)
+#if defined (HX_WINDOWS) && !defined (HX_WINRT)
 
 		HINSTANCE handle = ::GetModuleHandle (nullptr);
 		HICON icon = ::LoadIcon (handle, MAKEINTRESOURCE (1));
@@ -367,7 +367,7 @@ namespace lime {
 
 		}
 
-		#endif
+#endif
 
 		int sdlRendererFlags = 0;
 

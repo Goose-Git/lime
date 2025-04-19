@@ -36,6 +36,8 @@
 	<!-- <set name="LIME_VPX" value="1" />
 	<set name="LIME_WEBM" value="1" /> -->
 	<set name="LIME_ZLIB" value="1" />
+	<set name="LIME_PLUTOVG" value="1" />
+	<set name="LIME_LUNASVG" value="1" />
 
 	<set name="OUTPUT_DIR" value="../ndll" unless="OUTPUT_DIR" />
 	<set name="NATIVE_TOOLKIT_PATH" value="lib" unless="NATIVE_TOOLKIT_PATH" />
@@ -46,6 +48,8 @@
 	<set name="NATIVE_TOOLKIT_HAVE_MBEDTLS" value="1" if="LIME_MBEDTLS" />
 	<set name="NATIVE_TOOLKIT_HAVE_PNG" value="1" if="LIME_PNG" />
 	<set name="NATIVE_TOOLKIT_HAVE_SDL" value="1" if="LIME_SDL" />
+	<set name="NATIVE_TOOLKIT_HAVE_LUNASVG" value="1" if="LIME_LUNASVG" />
+	<set name="NATIVE_TOOLKIT_HAVE_PLUTOVG" value="1" if="LIME_PLUTOVG" />
 
 	<set name="NATIVE_TOOLKIT_SDL_STATIC" value="1" />
 	<set name="NATIVE_TOOLKIT_SDL_ANGLE" value="1" if="LIME_SDL_ANGLE" />
@@ -104,7 +108,6 @@
 		</section>
 
 		<section if="LIME_FREETYPE">
-
 			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/freetype/include" />
 			<compilerflag value="-DLIME_FREETYPE" />
 
@@ -124,8 +127,21 @@
 				<file name="src/text/harfbuzz/HarfbuzzBindings.cpp" />
 
 			</section>
-
 		</section>
+
+		<!-- Pluto VG -->
+		<section if="LIME_PLUTOVG">
+			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/plutovg" />
+			<compilerflag value="-DLIME_LUNASVG" />
+			<file name="src/svg/LunaInterface.cpp" /> 
+		</section>
+
+		<!-- Luna SVG -->
+		<section if="LIME_LUNASVG">
+			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/lunasvg/include" />
+			<compilerflag value="-DLIME_LUNASVG" />
+		</section>
+
 
 		<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/hashlink/src" />
 
@@ -370,6 +386,8 @@
 	<include name="lib/vpx-files.xml" />
 	<include name="lib/webm-files.xml" />
 	<include name="lib/zlib-files.xml" />
+	<include name="lib/plutovg/files.xml" />
+	<include name="lib/lunasvg/files.xml" />
 
 	<set name="DEBUGEXTRA" value="-debug" if="fulldebug" />
 	<set name="LIBSUFFIX" value="${HX_TARGET_SUFFIX}" if="HX_TARGET_SUFFIX" />
@@ -403,6 +421,8 @@
 		<files id="native-toolkit-vpx" if="LIME_VPX" />
 		<files id="native-toolkit-webm" if="LIME_WEBM" />
 		<files id="native-toolkit-zlib" if="LIME_ZLIB" />
+		<files id="native-toolkit-plutovg" if="LIME_PLUTOVG" />
+		<files id="native-toolkit-lunasvg" if="LIME_LUNASVG" />
 
 		<section unless="static_link">
 

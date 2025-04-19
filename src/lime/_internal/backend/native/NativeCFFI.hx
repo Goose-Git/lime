@@ -655,6 +655,10 @@ class NativeCFFI
 	private static var lime_window_hide = new cpp.Callable<cpp.Object->Bool->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_hide","obv", false));
 	private static var lime_window_get_hwnd = new cpp.Callable<cpp.Object->Int>(cpp.Prime._loadPrime("lime", "lime_window_get_hwnd", "oi", false));
 	private static var lime_get_hwnd_depth_list = new cpp.Callable<Int->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_get_hwnd_depth_list", "io", false));
+	private static var lime_messageBox = new cpp.Callable<String->String->String->String->Int->Int>(cpp.Prime._loadPrime("lime", "lime_messageBox", "ssssii", false));
+	private static var lime_load_svg_into_bitmap = new cpp.Callable<cpp.Object->Int->Int->cpp.Object->Int>(cpp.Prime._loadPrime("lime", "lime_load_svg_into_bitmap", "oiioi", false));
+	private static var lime_get_svg_width = new cpp.Callable<cpp.Object->Int>(cpp.Prime._loadPrime("lime", "lime_get_svg_width", "oi", false));
+	private static var lime_get_svg_height = new cpp.Callable<cpp.Object->Int>(cpp.Prime._loadPrime("lime", "lime_get_svg_height", "oi", false));
 
 	#end
 	#end
@@ -1470,6 +1474,10 @@ class NativeCFFI
 	@:hlNative("lime", "hl_window_hide") private static function lime_window_hide(handle:CFFIPointer, hide:Bool):Void {}
 	@:hlNative("lime", "hl_window_get_hwnd") private static function lime_window_get_hwnd(handle:CFFIPointer):Int {return 0;}
 	@:hlNative("lime", "hl_get_hwnd_depth_list") private static function lime_get_hwnd_depth_list(parentHWnd:Int):Dynamic { return null; }
+	@:hlNative("lime", "hl_messageBox") private static function lime_messageBox(title:String, message:String, type:String, iconType:String, buttonType:Int):Int{return 0;}
+	@:hlNative("lime", "hl_load_svg_into_bitmap") private static function lime_load_svg_into_bitmap( data:Bytes, width:Int, height:Int, imageBuffer:ImageBuffer ):Int {return 0;}
+	@:hlNative("lime", "hl_get_svg_width") private static function lime_get_svg_width( data:Bytes ):Int {return 0;}
+	@:hlNative("lime", "hl_get_svg_height") private static function lime_get_svg_height( data:Bytes ):Int {return 0;}
 
 	#end
 	#end

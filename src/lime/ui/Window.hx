@@ -798,6 +798,14 @@ class Window
 		#end
     }
 
+	public function getHWndDepthList():Array<Int>
+	{
+		#if (hl || windows)
+			return __backend.getHWndDepthList();
+		#else
+			return [0];
+		#end
+	}
 }
 
 #if air

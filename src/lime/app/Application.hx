@@ -686,6 +686,17 @@ class Application extends Module
 		#end
 		
 	}
+
+	public function messageBox(title:String, message:String, type:String, iconType:String, buttonType:Int):Int
+	{
+		// type - "ok" "okcancel" "yesno" "yesnocancel"
+		// iconType -  "info" "warning" "error" "question"
+		// buttonType - 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel
+		#if (hl || windows)
+		return __backend.messageBox(title, message, type, iconType, buttonType);
+		#end
+		return 0;
+	}
 }
 
 #if air

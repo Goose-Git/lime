@@ -736,12 +736,6 @@ class NativeApplication
 		return y;
 	}
 
-	public function messageBox(title:String, message:String, type:String, iconType:String, buttonType:Int):Int
-	{
-		//return NativeCFFI.lime_messageBox( title, message, type, iconType, buttonType );
-		return 0;
-	}
-
     private function updateGlobalMouse():Void 
 	{
 		// This will record a global mouse position each frame and also check it against
@@ -758,6 +752,11 @@ class NativeApplication
             parent.onMouseMoveGlobal.dispatch( mouseX, mouseY );
         }
     }
+
+    public function messageBox(title:String, message:String, type:String, iconType:String, buttonType:Int):Int
+	{
+		return NativeCFFI.lime_messageBox( title, message, type, iconType, buttonType );
+	}
 	
 }
 

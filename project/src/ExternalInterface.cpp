@@ -48,7 +48,7 @@
 #include <utils/compress/LZMA.h>
 #include <utils/compress/Zlib.h>
 #include <vm/NekoVM.h>
-
+#include <iostream>
 
 #include <SDL.h>
 
@@ -56,6 +56,7 @@
 #ifdef HX_WINDOWS
 #include <locale>
 #include <codecvt>
+#include <tinyfiledialogs.h>
 #endif
 #include <memory>
 
@@ -4157,11 +4158,9 @@ namespace lime {
 	static int id_hwnd_array;
 	static bool init = false;
 
-	// ------------------------------------------------------
-	// Name: get_hwnd_depth_list (Windows)
-	// ------------------------------------------------------
 	value lime_get_hwnd_depth_list(int parentHWnd)
 	{
+	#ifdef HX_WINDOWS
 		// === Look at SDLSystem.cpp - GetDisplay === that shows how to do it for cffi
 
 		if (!init) {
@@ -4206,13 +4205,14 @@ namespace lime {
 
 		alloc_field(list_result, id_hwnd_array, hwnd_array);
 		return list_result;
+	#else
+		return alloc_empty_object();
+	#endif
 	}
 	
-	// ------------------------------------------------------
-	// Name: get_hwnd_depth_list (HashLink)
-	// ------------------------------------------------------
 	HL_PRIM vdynamic* HL_NAME(hl_get_hwnd_depth_list)(int parentHWnd)
 	{
+	#ifdef HX_WINDOWS
 		parentHWnd = 0;
 
 		// Go through all windows and create an array of HWNDs we can return
@@ -4259,6 +4259,38 @@ namespace lime {
 		}
 
 		return list_result;
+	#else
+		return NULL;
+	#endif
+	}
+
+	int messageBox(std::wstring* _title, std::wstring* _message, std::wstring* _type, std::wstring* _iconType, int buttonType) {
+	#ifdef LIME_TINYFILEDIALOGS
+			int res = tinyfd_messageBoxW(_title->c_str(), _message->c_str(), _type->c_str(), _iconType->c_str(), buttonType);
+			if (_title) delete _title;
+			if (_message) delete _message;
+			if (_type) delete _type;
+			if (_iconType) delete _iconType;
+			return res;
+	#endif
+			return 0;
+		}
+
+	int lime_messageBox(HxString title, HxString message, HxString type, HxString iconType, int buttonType) {
+		std::wstring* _title = hxstring_to_wstring(title);
+		std::wstring* _message = hxstring_to_wstring(message);
+		std::wstring* _type = hxstring_to_wstring(type);
+		std::wstring* _iconType = hxstring_to_wstring(iconType);
+		return messageBox(_title, _message, _type, _iconType, buttonType);
+	}
+
+
+	HL_PRIM int HL_NAME(hl_messageBox)(hl_vstring * title, hl_vstring * message, hl_vstring * type, hl_vstring * iconType, int buttonType) {
+		std::wstring* _title = hxstring_to_wstring(title);
+		std::wstring* _message = hxstring_to_wstring(message);
+		std::wstring* _type = hxstring_to_wstring(type);
+		std::wstring* _iconType = hxstring_to_wstring(iconType);
+		return messageBox(_title, _message, _type, _iconType, buttonType);
 	}
 
 
@@ -4432,6 +4464,7 @@ namespace lime {
 	DEFINE_PRIME2v (lime_window_hide);
 	DEFINE_PRIME1 (lime_window_get_hwnd);
 	DEFINE_PRIME1 (lime_get_hwnd_depth_list);
+	DEFINE_PRIME5 (lime_messageBox);
 
 
 	#define _ENUM "?"
@@ -4635,6 +4668,7 @@ namespace lime {
 	DEFINE_HL_PRIM (_VOID, hl_window_hide, _TCFFIPOINTER _BOOL);
 	DEFINE_HL_PRIM( _I32, hl_window_get_hwnd, _TCFFIPOINTER);
 	DEFINE_HL_PRIM( _DYN, hl_get_hwnd_depth_list, _I32);
+	DEFINE_HL_PRIM (_I32, hl_messageBox, _STRING _STRING _STRING _STRING _I32 );	
 }
 
 

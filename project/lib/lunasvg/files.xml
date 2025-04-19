@@ -1,0 +1,32 @@
+<xml>
+	
+	<files id="native-toolkit-lunasvg" >
+		
+		<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/lunasvg/src" />
+		<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/lunasvg/include" />
+		<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/plutovg" />
+		<compilerflag value="-DPACKAGE=lunasvg" />
+		
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/lunasvg.cpp" />
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/element.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/property.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/parser.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/layoutcontext.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/canvas.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/clippathelement.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/defselement.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/gelement.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/geometryelement.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/graphicselement.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/maskelement.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/markerelement.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/paintelement.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/stopelement.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/styledelement.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/styleelement.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/svgelement.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/symbolelement.cpp"/>
+		<file name="${NATIVE_TOOLKIT_PATH}/lunasvg/src/useelement.cpp"/>		
+	</files>
+	
+</xml>
