@@ -4,7 +4,7 @@
 	shallow = true
 [submodule "project/lib/sdl"]
 	path = project/lib/sdl
-	url = https://github.com/Goose-Git/SDL_lime
+	url = https://github.com/Goose-Git/sdl-lite
 	shallow = true
 [submodule "project/lib/openal"]
 	path = project/lib/openal
