@@ -138,6 +138,10 @@ import ::APP_MAIN::;
 
 	@:noCompletion @:dox(hide) public static function __init__()
 	{
+
+		// If things don't load you can throw an error here and it may help! - found 
+		// a HL problem where the PRIMS weren't set up correctly.
+
 		var init = lime.app.Application;
 
 		#if neko
