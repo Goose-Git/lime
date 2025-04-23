@@ -78,7 +78,7 @@ class HTML5Window
 
 	private var __focusPending:Bool;
 
-	public function new(parent:Window)
+	public function new(parent:Window, WindowParent:lime.ui.Window = null )
 	{
 		this.parent = parent;
 
