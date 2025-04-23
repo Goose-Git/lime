@@ -172,6 +172,8 @@ class NativeApplication
 
 	private function handleApplicationEvent():Void
 	{
+		FrameTimer.StartTiming();
+
 		switch (applicationEventInfo.type)
 		{
 			case UPDATE:
@@ -181,6 +183,8 @@ class NativeApplication
 
 			default:
 		}
+
+		FrameTimer.EndTiming();
 	}
 
 	private function handleClipboardEvent():Void

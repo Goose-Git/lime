@@ -24,6 +24,7 @@ namespace lime {
 		int width;
 		double x;
 		double y;
+		double dpiScale; 
 
 		Image (value image);
 		~Image ();

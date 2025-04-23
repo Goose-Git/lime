@@ -362,6 +362,7 @@ class NativeCFFI
 	@:cffi private static function lime_zlib_decompress(data:Dynamic, bytes:Dynamic):Dynamic;
 
 
+
 	#else
 	private static var lime_application_create = new cpp.Callable<Void->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_application_create", "o", false));
 	private static var lime_application_event_manager_register = new cpp.Callable<cpp.Object->cpp.Object->cpp.Void>(cpp.Prime._loadPrime("lime",
@@ -796,7 +797,22 @@ class NativeCFFI
 	private static var lime_zlib_compress = CFFI.load("lime", "lime_zlib_compress", 2);
 	private static var lime_zlib_decompress = CFFI.load("lime", "lime_zlib_decompress", 2);
 
-	// this is cppia - which we don't use
+	// this is cppia - lime tools uses these for the build process
+	// so do "lime rebuild tools"
+
+	private static var lime_get_global_mouse_x = CFFI.load("lime", "lime_get_global_mouse_x", 0);
+	private static var lime_get_global_mouse_y = CFFI.load("lime", "lime_get_global_mouse_y", 0);
+	private static var lime_get_clipboard_image_size = CFFI.load("lime", "lime_get_clipboard_image_size", 1);
+	private static var lime_get_clipboard_image_pixels = CFFI.load("lime", "lime_get_clipboard_image_pixels", 1);
+	private static var lime_window_get_border_thickness = CFFI.load("lime", "lime_window_get_border_thickness", 1);
+	private static var lime_window_get_titlebar_height = CFFI.load("lime", "lime_window_get_titlebar_height", 1);
+	private static var lime_window_hide = CFFI.load("lime", "lime_window_hide", 2);
+	private static var lime_window_get_hwnd = CFFI.load("lime", "lime_window_get_hwnd", 1);
+	private static var lime_get_hwnd_depth_list = CFFI.load("lime", "lime_get_hwnd_depth_list", 1);
+	private static var lime_messageBox = CFFI.load("lime", "lime_messageBox", 5);
+	private static var lime_load_svg_into_bitmap = CFFI.load("lime", "lime_load_svg_into_bitmap", 4);
+	private static var lime_get_svg_width = CFFI.load("lime", "lime_get_svg_width", 1);
+	private static var lime_get_svg_height = CFFI.load("lime", "lime_get_svg_height", 1);
 
 	#end
 

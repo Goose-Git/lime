@@ -188,6 +188,11 @@ class Image
 	**/
 	public var y:Float;
 
+	/** 
+		The DPI scale that this image was loaded at
+	**/
+	public var dpiScale:Float;
+
 	#if commonjs
 	private static function __init__()
 	{

@@ -286,4 +286,32 @@ import lime._internal.backend.native.NativeCFFI;
 	{
 		return (a : Int) + b;
 	}
+
+	public static function toString(keyCode:Int):String
+	{
+		if ( keyCode > 32 && keyCode < 126 )
+			return String.fromCharCode(keyCode);
+		else if ( keyCode == KeyCode.DELETE )
+			return "Delete";
+		else if ( keyCode == KeyCode.BACKSPACE )
+			return "Backspace";
+		else if ( keyCode == KeyCode.TAB )
+			return "Tab";
+		else if ( keyCode == KeyCode.RETURN )
+			return "Return";
+		else if ( keyCode == KeyCode.ESCAPE )
+			return "Escape";
+		else if ( keyCode == KeyCode.SPACE )
+			return "Space";
+		else if ( keyCode == KeyCode.UP )
+			return "UpArrow";
+		else if ( keyCode == KeyCode.DOWN )
+			return "DownArrow";
+		else if ( keyCode == KeyCode.LEFT )
+			return "LeftArrow";
+		else if ( keyCode == KeyCode.RIGHT )
+			return "RightArrow";
+		else 
+			return "Unknown";
+	}
 }
