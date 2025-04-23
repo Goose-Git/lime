@@ -18,6 +18,9 @@
 #include <ui/WindowEvent.h>
 #include "SDLWindow.h"
 
+#ifdef HX_WINDOWS
+#include <windows.h>
+#endif
 
 namespace lime {
 
@@ -51,9 +54,12 @@ namespace lime {
 			void ProcessTouchEvent (SDL_Event* event);
 			void ProcessWindowEvent (SDL_Event* event);
 			int WaitEvent (SDL_Event* event);
+			void CheckGlobalMouseEvents();
+            void CheckMouseButtonEvent( int nIndex, int buttonCode );
+            void DispatchGlobalMouseEvent( int button, bool pressed );
 
 			static void UpdateFrame ();
-			static void UpdateFrame (void*);
+			static void UpdateFrame (void*);		
 
 			static SDLApplication* currentApplication;
 
@@ -75,6 +81,8 @@ namespace lime {
 			TouchEvent touchEvent;
 			WindowEvent windowEvent;
 
+			// Keep the states of the main mouse buttons so we can fire global mouse events
+            bool mouseButtonDown[3];
 	};
 
 

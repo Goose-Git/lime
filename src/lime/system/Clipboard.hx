@@ -1,9 +1,13 @@
 package lime.system;
 
+import lime.graphics.Image;
+import lime.math.Rectangle;
+import lime.math.Vector2;
 import lime._internal.backend.native.NativeCFFI;
 import lime.app.Application;
 import lime.app.Event;
 import lime.system.CFFI;
+
 #if flash
 import flash.desktop.Clipboard as FlashClipboard;
 #elseif (js && html5)
@@ -112,5 +116,34 @@ class Clipboard
 		}
 
 		return value;
+	}
+
+	
+	public static function getImage():Image{
+		//
+		// This doesn't currently work on windows/cpp targets
+		// it actually only works on Hashlink.
+		// it looks like it should work on windows, see:
+		// void Clipboard::GetImageSize(Rectangle* size)
+		// in SDLSystem.cpp
+		//
+
+	#if (!macro && lime_cffi)
+	#if !cpp
+		var size : Rectangle = new Rectangle(0, 0);
+		NativeCFFI.lime_get_clipboard_image_size(size);
+
+		if ( size.x > 0 && size.y > 0 ){
+			// There's an image - get it's data
+			// Create an image big enought for it
+			var image = new Image(null, 0,0, Std.int(size.x), Std.int(size.y) );
+
+			// Now go back to C++ and tell it to fill this image
+			NativeCFFI.lime_get_clipboard_image_pixels(image);
+			return image;
+		}
+	#end
+	#end
+		return null;
 	}
 }

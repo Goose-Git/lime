@@ -30,6 +30,16 @@ namespace lime {
 		initFlags |= SDL_INIT_AUDIO;
 		#endif
 
+#ifdef HX_WINDOWS
+		// Set the DPI awareness of this app
+		printf("Setting DPI awareness \n");
+
+		// This will make everything small and not blurry in Windows apps (Windows and HL) - without this
+		// it will always treat everything like 1x DPI and will scale the contents of the window up
+		// making it look blurry and ugly. 
+		SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+#endif
+
 		if (SDL_Init (initFlags) != 0) {
 
 			printf ("Could not initialize SDL: %s.\n", SDL_GetError ());
@@ -71,6 +81,9 @@ namespace lime {
 			chdir (path);
 
 		}
+
+		for ( int n = 0; n < 3; n++ )
+            mouseButtonDown[n] = false;
 
 		CFRelease (resourcesURL);
 		#endif
@@ -852,6 +865,8 @@ namespace lime {
 
 	bool SDLApplication::Update () {
 
+		CheckGlobalMouseEvents();
+		
 		SDL_Event event;
 		event.type = -1;
 
@@ -985,6 +1000,59 @@ namespace lime {
 
 	}
 
+
+    void SDLApplication::DispatchGlobalMouseEvent( int button, bool pressed ){
+		//
+		// Global mouse events - these only work on windows platform
+		// 
+#ifdef HX_WINDOWS
+        // The window ID will be -1 for global mouse messages
+        mouseEvent.button = button;
+        mouseEvent.windowID = -1;
+
+        if ( pressed )
+            mouseEvent.type = MOUSE_DOWN;
+        else
+            mouseEvent.type = MOUSE_UP;
+        
+        // Fill mouse event with global coordinates in desktop space
+        int x, y;
+        SDL_GetGlobalMouseState(&x, &y);
+        mouseEvent.x = x;
+        mouseEvent.y = y;
+        MouseEvent::Dispatch (&mouseEvent);
+#endif
+    }
+
+    void SDLApplication::CheckMouseButtonEvent( int nIndex, int buttonCode ){
+
+#ifdef HX_WINDOWS
+        if ( mouseButtonDown[nIndex] == false ){
+            // Button wasn't pressed-  check if it is now
+            if ((GetKeyState(buttonCode) & 0x80) != 0){
+                // Button is down now, it must have just been pressed - MouseDown
+                mouseButtonDown[nIndex] = true;
+                DispatchGlobalMouseEvent( nIndex, true );
+            }
+        }
+        else{
+            // Button was pressed-  check if its not now
+            if ((GetKeyState(buttonCode) & 0x80) == 0){
+                // Button is not down now, it must have just been released - MouseUp
+                mouseButtonDown[nIndex] = false;
+                DispatchGlobalMouseEvent( nIndex, false );
+            }
+        }
+#endif
+    }
+
+    void SDLApplication::CheckGlobalMouseEvents() {
+#ifdef HX_WINDOWS
+        CheckMouseButtonEvent(0, VK_LBUTTON );
+        CheckMouseButtonEvent(2, VK_RBUTTON );
+#endif
+    }
+	
 
 }
 

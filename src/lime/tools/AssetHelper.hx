@@ -23,6 +23,7 @@ class AssetHelper
 
 	private static function __init__():Void
 	{
+		
 		/*
 		knownExtensions = [
 
@@ -35,6 +36,7 @@ class AssetHelper
 
 		];*/
 
+		
 		// Gooose engine - 2025
 		// Change font files to be binary instead so we can load them directly using hxFreeType libary.
 		knownExtensions = [

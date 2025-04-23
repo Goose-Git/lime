@@ -12,7 +12,7 @@
 #include <system/CFFI.h>
 #include <system/DisplayMode.h>
 #include <stdint.h>
-
+#include <list>
 
 namespace lime {
 
@@ -66,14 +66,23 @@ namespace lime {
 			virtual bool SetVisible (bool visible) = 0;
 			virtual void WarpMouse (int x, int y) = 0;
 
+			virtual int GetBorderThickness() = 0;
+			virtual int GetTitlebarHeight() = 0;
+			virtual void Hide(bool hide) = 0;
+	
 			Application* currentApplication;
 			int flags;
+
+			int hWnd;
+
+			// A static global list of SDL windows
+			static std::list<Window*> WindowList;
 
 
 	};
 
 
-	Window* CreateWindow (Application* application, int width, int height, int flags, const char* title);
+	Window* CreateWindow (Application* application, int width, int height, int flags, const char* title, Window* parentWnd);
 
 
 	enum WindowFlags {

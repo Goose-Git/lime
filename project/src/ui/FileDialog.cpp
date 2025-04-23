@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
+#include <iostream>
 
 #include <tinyfiledialogs.h>
 
@@ -72,6 +73,7 @@ namespace lime {
 
 		#ifdef HX_WINDOWS
 
+		/*
 		std::vector<std::wstring> filters_vec;
 		if (filter) {
 			std::wstring temp (L"*.");
@@ -101,6 +103,40 @@ namespace lime {
 			std::wstring* _path = new std::wstring (path);
 			return _path;
 
+		}*/
+
+		// 18 Feb 2022 (Greg)
+        // This did NOT seem to work correctly with filters at all....
+        // I had to make it so you can pass in the filter in a different format which gets split up. Probably want to do this for other platforms
+        // and for OpenFiles? maybe? Seems like this wasn't really tested all that well...
+        //
+        // Must be  like "Project files|*.gsp";
+        //
+
+        int pos = filter->find_first_of( L"|");
+        if ( pos == -1 )
+            return NULL;
+
+        // I added this - seperate the string into 2 parts - the descriptions and the extension
+        std::wstring filter_desc = filter->substr(0,pos);
+        std::wstring filter_ext = filter->substr(pos+1);
+
+        //std::wcout << type_desc << std::endl;
+		//const wchar_t* filters[] = { filter ? (temp + *filter).c_str () : NULL };
+
+		const wchar_t* filters_ext[] = { filter_ext.c_str()  };
+		
+		//const wchar_t* path = tinyfd_openFileDialogW (title ? title->c_str () : 0, defaultPath ? defaultPath->c_str () : 0, filter ? 1 : 0, filter ? filters : NULL, NULL, 0);
+
+        const wchar_t* path = tinyfd_openFileDialogW (  title ? title->c_str () : 0, 
+                                                        defaultPath ? defaultPath->c_str () : 0, 
+                                                        1,
+                                                        filters_ext, 
+                                                        {filter_desc.c_str()},
+                                                        0);
+		if (path && std::wcslen(path) > 0) {
+			std::wstring* _path = new std::wstring (path);
+			return _path;
 		}
 
 		#else

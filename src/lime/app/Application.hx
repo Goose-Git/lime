@@ -70,6 +70,15 @@ class Application extends Module
 	**/
 	public var windows(get, null):Array<Window>;
 
+	/** Global mouse coordinates, relative to the top-left of the desktop **/
+	public var mouseX(get, null):Int;
+	public var mouseY(get, null):Int;
+
+    /** Global app-wide MouseMove event for the mouse being anywhere on the screen **/
+    public var onMouseMoveGlobal(default, null) = new Event<Float->Float->Void>();
+    public var onMouseDownGlobal(default, null) = new Event<Float->Float->Int->Void>();
+    public var onMouseUpGlobal(default, null) = new Event<Float->Float->Int->Void>();
+
 	@:noCompletion private var __backend:ApplicationBackend;
 	@:noCompletion private var __preloader:Preloader;
 	@:noCompletion private var __window:Window;
@@ -130,9 +139,9 @@ class Application extends Module
 		Creates a new Window and adds it to the Application
 		@param	attributes	A set of parameters to initialize the window
 	**/
-	public function createWindow(attributes:WindowAttributes):Window
+	public function createWindow(attributes:WindowAttributes, parentWnd:Window = null):Window
 	{
-		var window = __createWindow(attributes);
+		var window = __createWindow(attributes, parentWnd);
 		__addWindow(window);
 		return window;
 	}
@@ -494,9 +503,9 @@ class Application extends Module
 		}
 	}
 
-	@:noCompletion private function __createWindow(attributes:WindowAttributes):Window
+	@:noCompletion private function __createWindow(attributes:WindowAttributes, parentWnd:Window ):Window
 	{
-		var window = new Window(this, attributes);
+		var window = new Window(this, attributes, parentWnd );
 		if (window.id == -1) return null;
 		return window;
 	}
@@ -600,7 +609,9 @@ class Application extends Module
 			onWindowClose();
 		}
 
-		__removeWindow(window);
+		// Added this - dont remove child windows
+        if ( window.isChildWindow() == false )
+		    __removeWindow(window);
 	}
 
 	@:noCompletion private override function __unregisterLimeModule(application:Application):Void
@@ -631,6 +642,36 @@ class Application extends Module
 	@:noCompletion private inline function get_windows():Array<Window>
 	{
 		return __windows;
+	}
+
+	inline function get_mouseX():Int
+	{
+		#if (hl || windows)
+			return __backend.mouseX;
+		#else
+			return 0;
+		#end
+	}
+
+	inline function get_mouseY():Int
+	{
+		#if (hl || windows)
+			return __backend.mouseY;
+		#else
+			return 0;
+		#end
+		
+	}
+
+	public function messageBox(title:String, message:String, type:String, iconType:String, buttonType:Int):Int
+	{
+		// type - "ok" "okcancel" "yesno" "yesnocancel"
+		// iconType -  "info" "warning" "error" "question"
+		// buttonType - 0 for cancel/no , 1 for ok/yes , 2 for no in yesnocancel
+		#if (hl || windows)
+		return __backend.messageBox(title, message, type, iconType, buttonType);
+		#end
+		return 0;
 	}
 }
 

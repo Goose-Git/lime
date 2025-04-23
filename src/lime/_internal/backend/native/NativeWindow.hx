@@ -46,17 +46,23 @@ class NativeWindow
 	private var displayMode:DisplayMode;
 	private var frameRate:Float;
 	private var mouseLock:Bool;
-	private var parent:Window;
 	private var useHardware:Bool;
+	private var parent:Window;		
+	
+	// if actualParentWnd is set to something then this IS a child window and actualParentWnd is the parent
+	private var actualParentWnd:Window;
+
+
 	#if lime_cairo
 	private var cacheLock:Dynamic;
 	private var cairo:Cairo;
 	private var primarySurface:CairoSurface;
 	#end
 
-	public function new(parent:Window)
+	public function new(parent:Window, WindowParent:Window)
 	{
 		this.parent = parent;
+		this.actualParentWnd = WindowParent;
 
 		cursor = DEFAULT;
 		displayMode = new DisplayMode(0, 0, 0, 0);
@@ -107,7 +113,11 @@ class NativeWindow
 		var height = Reflect.hasField(attributes, "height") ? attributes.height : #if desktop 600 #else 0 #end;
 
 		#if (!macro && lime_cffi)
-		handle = NativeCFFI.lime_window_create(parent.application.__backend.handle, width, height, flags, title);
+
+        if ( WindowParent != null )
+		    handle = NativeCFFI.lime_window_create(parent.application.__backend.handle, width, height, flags, title, WindowParent.__backend.handle );
+        else 
+            handle = NativeCFFI.lime_window_create(parent.application.__backend.handle, width, height, flags, title, null );
 
 		if (handle != null)
 		{
@@ -115,8 +125,17 @@ class NativeWindow
 			parent.__height = NativeCFFI.lime_window_get_height(handle);
 			parent.__x = NativeCFFI.lime_window_get_x(handle);
 			parent.__y = NativeCFFI.lime_window_get_y(handle);
-			parent.__hidden = (Reflect.hasField(attributes, "hidden") && attributes.hidden);
+
+            // Not using this any more
+			//parent.__hidden = (Reflect.hasField(attributes, "hidden") && attributes.hidden);
+
 			parent.id = NativeCFFI.lime_window_get_id(handle);
+            parent.__borderThickness = NativeCFFI.lime_window_get_border_thickness(handle);
+            parent.__titlebarHeight = NativeCFFI.lime_window_get_titlebar_height(handle);
+            
+            // Non-resizable dialogs dont have border thickness
+            if ( parent.__borderThickness != 0 )
+                parent.storeBorderThicknessGlobally();
 		}
 
 		parent.__scale = NativeCFFI.lime_window_get_scale(handle);
@@ -194,6 +213,11 @@ class NativeWindow
 
 	public function close():Void
 	{
+		if ( isChildWindow() ){
+            parent.onClose.dispatch();
+            return;
+        }
+
 		if (!closing)
 		{
 			closing = true;
@@ -522,11 +546,24 @@ class NativeWindow
 					case TEXT: TEXT;
 					case WAIT: WAIT;
 					case WAIT_ARROW: WAIT_ARROW;
+					case SPINNER: SPINNER;			
+					case DRAG_DROP: DRAG_DROP;			
+					case DRAG_DROP_COPY: DRAG_DROP_COPY;			
+					case DRAG_DROP_MOVE: DRAG_DROP_MOVE;			
+					case DRAG_DROP_NONE: DRAG_DROP_NONE;			
+					case RESIZE_DOPE: RESIZE_DOPE;			
+					case TRANS_DIAG: TRANS_DIAG;			
+					case TRANS_HORZ: TRANS_HORZ;			
+					case TRANS_ROTATE: TRANS_ROTATE;			
+					case TRANS_VERT: TRANS_VERT;			
+					case TRANS_MOVE: TRANS_MOVE;			
+					case TRANS_DIAG2: TRANS_DIAG2;			
 					default: DEFAULT;
 				}
 
 				#if (!macro && lime_cffi)
-				NativeCFFI.lime_window_set_cursor(handle, type);
+				if (handle != null) 
+					NativeCFFI.lime_window_set_cursor(handle, type);
 				#end
 			}
 
@@ -721,6 +758,54 @@ class NativeWindow
 		NativeCFFI.lime_window_warp_mouse(handle, x, y);
 		#end
 	}
+
+	public function isChildWindow():Bool
+	{
+		return (actualParentWnd != null);
+	}
+
+	public function hide( hide:Bool = true ) {
+        #if (!macro && lime_cffi)
+        NativeCFFI.lime_window_hide(handle, hide );
+        #end
+    }
+
+    public function getHWnd():Int
+    {
+        if (handle != null)
+        {
+            #if (!macro && lime_cffi)
+            return NativeCFFI.lime_window_get_hwnd(handle);
+            #end
+        }
+        return 0;
+    }
+
+	public function getHWndDepthList():Array<Int>
+	{
+		// This doesnt work for some reason...
+		//var parentWnd = ( actualParentWnd == null ) ? parent.hwnd : actualParentWnd.hwnd;
+
+		var parentWnd = 0;
+		var hwndList:Array<Int> = [];
+
+#if (!macro && lime_cffi)
+		#if hl
+		var fields:hl.NativeArray<Dynamic> = NativeCFFI.lime_get_hwnd_depth_list( parentWnd ).hwndList;
+		for ( field in fields )
+			if ( field != null )
+				hwndList.push( field.hwnd );
+
+		#else
+		var fields:Array<Dynamic> = NativeCFFI.lime_get_hwnd_depth_list( parentWnd ).hwnd_array;  
+		for ( field in fields )
+			if ( field != null )
+				hwndList.push( field );
+		#end
+#end       
+		return hwndList;
+	}
+	
 }
 
 #if (haxe_ver >= 4.0) private enum #else @:enum private #end abstract MouseCursorType(Int) from Int to Int
@@ -738,6 +823,18 @@ class NativeWindow
 	var TEXT = 10;
 	var WAIT = 11;
 	var WAIT_ARROW = 12;
+	var SPINNER = 13;		
+	var DRAG_DROP = 14;		
+	var DRAG_DROP_COPY = 15;		
+	var DRAG_DROP_MOVE = 16;		
+	var DRAG_DROP_NONE = 17;
+	var RESIZE_DOPE = 18;
+	var TRANS_DIAG = 19;
+	var TRANS_HORZ = 20;
+	var TRANS_ROTATE = 21;
+	var TRANS_VERT = 22;	
+	var TRANS_MOVE = 23;	
+	var TRANS_DIAG2 = 24;
 }
 
 #if (haxe_ver >= 4.0) private enum #else @:enum private #end abstract WindowFlags(Int)

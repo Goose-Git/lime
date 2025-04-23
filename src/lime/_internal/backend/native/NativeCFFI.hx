@@ -285,7 +285,7 @@ class NativeCFFI
 
 	@:cffi private static function lime_window_context_unlock(handle:Dynamic):Void;
 
-	@:cffi private static function lime_window_create(application:Dynamic, width:Int, height:Int, flags:Int, title:String):Dynamic;
+	@:cffi private static function lime_window_create(application:Dynamic, width:Int, height:Int, flags:Int, title:String, parentWndHandle:Dynamic ):Dynamic;
 
 	@:cffi private static function lime_window_focus(handle:Dynamic):Void;
 
@@ -360,6 +360,9 @@ class NativeCFFI
 	@:cffi private static function lime_zlib_compress(data:Dynamic, bytes:Dynamic):Dynamic;
 
 	@:cffi private static function lime_zlib_decompress(data:Dynamic, bytes:Dynamic):Dynamic;
+
+
+
 	#else
 	private static var lime_application_create = new cpp.Callable<Void->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_application_create", "o", false));
 	private static var lime_application_event_manager_register = new cpp.Callable<cpp.Object->cpp.Object->cpp.Void>(cpp.Prime._loadPrime("lime",
@@ -557,8 +560,8 @@ class NativeCFFI
 		"lime_window_context_make_current", "ov", false));
 	private static var lime_window_context_unlock = new cpp.Callable<cpp.Object->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_context_unlock", "ov",
 		false));
-	private static var lime_window_create = new cpp.Callable<cpp.Object->Int->Int->Int->String->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_window_create",
-		"oiiiso", false));
+		private static var lime_window_create = new cpp.Callable<cpp.Object->Int->Int->Int->String->cpp.Object->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_window_create", "oiiisoo", false));
+
 	private static var lime_window_focus = new cpp.Callable<cpp.Object->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_focus", "ov", false));
 	private static var lime_window_get_context = new cpp.Callable<cpp.Object->Float>(cpp.Prime._loadPrime("lime", "lime_window_get_context", "od", false));
 	private static var lime_window_get_context_type = new cpp.Callable<cpp.Object->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_window_get_context_type",
@@ -622,6 +625,23 @@ class NativeCFFI
 		false));
 	private static var lime_zlib_decompress = new cpp.Callable<cpp.Object->cpp.Object->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_zlib_decompress", "ooo",
 		false));
+
+	// GREGDENNESS
+	// C++
+	private static var lime_get_global_mouse_x = new cpp.Callable<Void->Int>(cpp.Prime._loadPrime("lime", "lime_get_global_mouse_x", "i", false));
+	private static var lime_get_global_mouse_y = new cpp.Callable<Void->Int>(cpp.Prime._loadPrime("lime", "lime_get_global_mouse_y", "i", false));
+	private static var lime_get_clipboard_image_size = new cpp.Callable<cpp.Object->Void>(cpp.Prime._loadPrime("lime", "lime_get_clipboard_image_size", "ov", false));
+	private static var lime_get_clipboard_image_pixels = new cpp.Callable<cpp.Object->Void>(cpp.Prime._loadPrime("lime", "lime_get_clipboard_image_pixels", "ov", false));
+	private static var lime_window_get_border_thickness = new cpp.Callable<cpp.Object->Int>(cpp.Prime._loadPrime("lime", "lime_window_get_border_thickness", "oi", false));  
+	private static var lime_window_get_titlebar_height = new cpp.Callable<cpp.Object->Int>(cpp.Prime._loadPrime("lime", "lime_window_get_titlebar_height", "oi", false));    
+	private static var lime_window_hide = new cpp.Callable<cpp.Object->Bool->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_hide","obv", false));
+	private static var lime_window_get_hwnd = new cpp.Callable<cpp.Object->Int>(cpp.Prime._loadPrime("lime", "lime_window_get_hwnd", "oi", false));
+	private static var lime_get_hwnd_depth_list = new cpp.Callable<Int->cpp.Object>(cpp.Prime._loadPrime("lime", "lime_get_hwnd_depth_list", "io", false));
+	private static var lime_messageBox = new cpp.Callable<String->String->String->String->Int->Int>(cpp.Prime._loadPrime("lime", "lime_messageBox", "ssssii", false));
+	private static var lime_load_svg_into_bitmap = new cpp.Callable<cpp.Object->Int->Int->cpp.Object->Int>(cpp.Prime._loadPrime("lime", "lime_load_svg_into_bitmap", "oiioi", false));
+	private static var lime_get_svg_width = new cpp.Callable<cpp.Object->Int>(cpp.Prime._loadPrime("lime", "lime_get_svg_width", "oi", false));
+	private static var lime_get_svg_height = new cpp.Callable<cpp.Object->Int>(cpp.Prime._loadPrime("lime", "lime_get_svg_height", "oi", false));
+
 	#end
 	#end
 	#if (neko || cppia)
@@ -738,7 +758,7 @@ class NativeCFFI
 	private static var lime_window_context_lock = CFFI.load("lime", "lime_window_context_lock", 1);
 	private static var lime_window_context_make_current = CFFI.load("lime", "lime_window_context_make_current", 1);
 	private static var lime_window_context_unlock = CFFI.load("lime", "lime_window_context_unlock", 1);
-	private static var lime_window_create = CFFI.load("lime", "lime_window_create", 5);
+	private static var lime_window_create = CFFI.load("lime", "lime_window_create", 6);
 	private static var lime_window_focus = CFFI.load("lime", "lime_window_focus", 1);
 	private static var lime_window_get_context = CFFI.load("lime", "lime_window_get_context", 1);
 	private static var lime_window_get_context_type = CFFI.load("lime", "lime_window_get_context_type", 1);
@@ -776,6 +796,24 @@ class NativeCFFI
 	private static var lime_window_event_manager_register = CFFI.load("lime", "lime_window_event_manager_register", 2);
 	private static var lime_zlib_compress = CFFI.load("lime", "lime_zlib_compress", 2);
 	private static var lime_zlib_decompress = CFFI.load("lime", "lime_zlib_decompress", 2);
+
+	// this is cppia - lime tools uses these for the build process
+	// so do "lime rebuild tools"
+
+	private static var lime_get_global_mouse_x = CFFI.load("lime", "lime_get_global_mouse_x", 0);
+	private static var lime_get_global_mouse_y = CFFI.load("lime", "lime_get_global_mouse_y", 0);
+	private static var lime_get_clipboard_image_size = CFFI.load("lime", "lime_get_clipboard_image_size", 1);
+	private static var lime_get_clipboard_image_pixels = CFFI.load("lime", "lime_get_clipboard_image_pixels", 1);
+	private static var lime_window_get_border_thickness = CFFI.load("lime", "lime_window_get_border_thickness", 1);
+	private static var lime_window_get_titlebar_height = CFFI.load("lime", "lime_window_get_titlebar_height", 1);
+	private static var lime_window_hide = CFFI.load("lime", "lime_window_hide", 2);
+	private static var lime_window_get_hwnd = CFFI.load("lime", "lime_window_get_hwnd", 1);
+	private static var lime_get_hwnd_depth_list = CFFI.load("lime", "lime_get_hwnd_depth_list", 1);
+	private static var lime_messageBox = CFFI.load("lime", "lime_messageBox", 5);
+	private static var lime_load_svg_into_bitmap = CFFI.load("lime", "lime_load_svg_into_bitmap", 4);
+	private static var lime_get_svg_width = CFFI.load("lime", "lime_get_svg_width", 1);
+	private static var lime_get_svg_height = CFFI.load("lime", "lime_get_svg_height", 1);
+
 	#end
 
 	#if hl
@@ -1249,8 +1287,7 @@ class NativeCFFI
 
 	@:hlNative("lime", "hl_window_context_unlock") private static function lime_window_context_unlock(handle:CFFIPointer):Void {}
 
-	@:hlNative("lime", "hl_window_create") private static function lime_window_create(application:CFFIPointer, width:Int, height:Int, flags:Int,
-			title:String):CFFIPointer
+	@:hlNative("lime", "hl_window_create") private static function lime_window_create(application:CFFIPointer, width:Int, height:Int, flags:Int, title:String, parentWndHandle:CFFIPointer):CFFIPointer
 	{
 		return null;
 	}
@@ -1396,6 +1433,23 @@ class NativeCFFI
 	{
 		return null;
 	}
+
+	// GREGDENNESS
+	// Hashlink
+	@:hlNative("lime", "hl_get_global_mouse_x") private static function lime_get_global_mouse_x():Int { return 0; }
+	@:hlNative("lime", "hl_get_global_mouse_y") private static function lime_get_global_mouse_y():Int { return 0; }
+	@:hlNative("lime", "hl_get_clipboard_image_size") private static function lime_get_clipboard_image_size(size:Rectangle):Void {}
+	@:hlNative("lime", "hl_get_clipboard_image_pixels") private static function lime_get_clipboard_image_pixels(image:Image):Void {}
+	@:hlNative("lime", "hl_window_get_border_thickness") private static function lime_window_get_border_thickness(handle:CFFIPointer):Int{ return 0; }
+	@:hlNative("lime", "hl_window_get_titlebar_height") private static function lime_window_get_titlebar_height(handle:CFFIPointer):Int{ return 0; }
+	@:hlNative("lime", "hl_window_hide") private static function lime_window_hide(handle:CFFIPointer, hide:Bool):Void {}
+	@:hlNative("lime", "hl_window_get_hwnd") private static function lime_window_get_hwnd(handle:CFFIPointer):Int {return 0;}
+	@:hlNative("lime", "hl_get_hwnd_depth_list") private static function lime_get_hwnd_depth_list(parentHWnd:Int):Dynamic { return null; }
+	@:hlNative("lime", "hl_messageBox") private static function lime_messageBox(title:String, message:String, type:String, iconType:String, buttonType:Int):Int{return 0;}
+	@:hlNative("lime", "hl_load_svg_into_bitmap") private static function lime_load_svg_into_bitmap( data:Bytes, width:Int, height:Int, imageBuffer:ImageBuffer ):Int {return 0;}
+	@:hlNative("lime", "hl_get_svg_width") private static function lime_get_svg_width( data:Bytes ):Int {return 0;}
+	@:hlNative("lime", "hl_get_svg_height") private static function lime_get_svg_height( data:Bytes ):Int {return 0;}
+
 	#end
 	#end
 	#if (lime_cffi && !macro && android)

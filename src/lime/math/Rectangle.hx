@@ -1,8 +1,5 @@
 package lime.math;
 
-#if flash
-import flash.geom.Rectangle as FlashRectangle;
-#end
 
 /**
 	The `Rectangle` class provides a simple object for storing
@@ -17,6 +14,7 @@ import flash.geom.Rectangle as FlashRectangle;
 #end
 class Rectangle
 {
+	
 	/**
 		Get or set the bottom (y + height) value of the `Rectangle`
 	**/
@@ -248,15 +246,6 @@ class Rectangle
 	}
 
 	/**
-		Whether this rectangle is empty
-		@return	`true` if the width or height is <= 0
-	**/
-	public function isEmpty():Bool
-	{
-		return (width <= 0 || height <= 0);
-	}
-
-	/**
 		Moves the rectangle by offset x and values
 		@param	dx	A delta x value
 		@param	dy	A delta y value
@@ -332,16 +321,19 @@ class Rectangle
 		return result;
 	}
 
-	@:noCompletion private function __toFlashRectangle():#if flash FlashRectangle #else Dynamic #end
-	{
-		#if flash
-		return new FlashRectangle(x, y, width, height);
-		#else
-		return null;
-		#end
-	}
+    
 
-	// Getters & Setters
+	/**
+		Whether this rectangle is empty
+		@return	`true` if the width or height is <= 0
+	**/
+	public #if INLINE_ON inline #end function isEmpty():Bool
+	{
+		return (width <= 0 || height <= 0);
+	}
+ 
+	// --------- Getters & Setters ------------------------------------------------------------------
+
 	@:noCompletion private function get_bottom():Float
 	{
 		return y + height;
@@ -423,9 +415,13 @@ class Rectangle
 		y = p.y;
 		return p.clone();
 	}
-	
-	@:noCompletion function toString():String
+
+	@:noCompletion private function __toFlashRectangle():#if flash FlashRectangle #else Dynamic #end
 	{
-		return "x=" + x + ", y=" + y + ", w=" + width + ", h=" + height;
+		#if flash
+		return new FlashRectangle(x, y, width, height);
+		#else
+		return null;
+		#end
 	}
 }

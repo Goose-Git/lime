@@ -81,6 +81,17 @@ abstract Float32Array(JSFloat32Array) from JSFloat32Array to JSFloat32Array
 		return @:privateAccess new haxe.io.Bytes(cast new JSUInt8Array(this.buffer));
 	}
 
+	public static function fromArray(a:Array<Float>, pos = 0, ?length:Int):Float32Array {
+		if (length == null)
+			length = a.length - pos;
+		if (pos < 0 || length < 0 || pos + length > a.length)
+			throw "Error.OutsideBounds";
+		var i = new Float32Array(a.length);
+		for (idx in 0...length)
+			i[idx] = a[idx + pos];
+		return i;
+	}
+
 	inline function toString()
 		return this != null ? 'Float32Array [byteLength:${this.byteLength}, length:${this.length}]' : null;
 }
@@ -143,6 +154,17 @@ abstract Float32Array(ArrayBufferView) from ArrayBufferView to ArrayBufferView
 	inline public function toBytes():haxe.io.Bytes
 	{
 		return this.buffer;
+	}
+
+	public static function fromArray(a:Array<Float>, pos = 0, ?length:Int):Float32Array {
+		if (length == null)
+			length = a.length - pos;
+		if (pos < 0 || length < 0 || pos + length > a.length)
+			throw "Error.OutsideBounds";
+		var i = new Float32Array(a.length);
+		for (idx in 0...length)
+			i[idx] = a[idx + pos];
+		return i;
 	}
 
 	// Internal

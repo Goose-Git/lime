@@ -15,7 +15,7 @@ namespace lime {
 
 		public:
 
-			SDLWindow (Application* application, int width, int height, int flags, const char* title);
+			SDLWindow (Application* application, int width, int height, int flags, const char* title, Window* parentWnd );
 			~SDLWindow ();
 
 			virtual void Alert (const char* message, const char* title);
@@ -59,6 +59,10 @@ namespace lime {
 			virtual const char* SetTitle (const char* title);
 			virtual bool SetVisible (bool visible);
 			virtual void WarpMouse (int x, int y);
+			virtual int GetBorderThickness();
+			virtual int GetTitlebarHeight();
+			virtual void Hide(bool hide);
+     
 			SDL_Renderer* sdlRenderer;
 			SDL_Texture* sdlTexture;
 			SDL_Window* sdlWindow;

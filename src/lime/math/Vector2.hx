@@ -4,6 +4,7 @@ package lime.math;
 import flash.geom.Point;
 #end
 
+
 /**
 	The `Vector2` class can be used for calculating math with
 	basic (x, y) coordinates
@@ -177,6 +178,16 @@ class Vector2
 		return result;
 	}
 
+	/**
+		Calculates the distance between this point and an (x,y) point.
+	**/
+	public function distanceToXY(x2:Float, y2:Float ):Float
+	{
+		var dx = x - x2;
+		var dy = y - y2;
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+
 	@:noCompletion private function __toFlashPoint():#if flash Point #else Dynamic #end
 	{
 		#if flash
@@ -196,4 +207,5 @@ class Vector2
 	{
 		return (x * x + y * y);
 	}
+	
 }

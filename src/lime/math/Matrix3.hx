@@ -1,6 +1,7 @@
 package lime.math;
 
 import lime.utils.Float32Array;
+import lime.utils.ObjectPool;
 
 /**
 	`Matrix3` is a 3x3 transformation matrix particularly useful for
@@ -104,6 +105,16 @@ abstract Matrix3(Float32Array) to Float32Array
 		var tx1 = tx * m.a + ty * m.c + m.tx;
 		ty = tx * m.b + ty * m.d + m.ty;
 		tx = tx1;
+	}
+
+	/**
+	 * 	A static way of doing concat, so you dont need to edit any
+	 *  existing matricies.
+	**/
+	public static function concatinate(m1:Matrix3, m2:Matrix3):Matrix3{
+		var res = m1.clone();
+		res.concat( m2 );
+		return res;
 	}
 
 	/**
@@ -541,8 +552,11 @@ abstract Matrix3(Float32Array) to Float32Array
 	public function transformVector(pos:Vector2, result:Vector2 = null):Vector2
 	{
 		if (result == null) result = new Vector2();
-		result.x = pos.x * a + pos.y * c + tx;
-		result.y = pos.x * b + pos.y * d + ty;
+		// Added this, there's a bug here if you pass in the same src and result Vector!
+		var temx 	: Float;
+		temx 		= pos.x * a + pos.y * c + tx;
+		result.y 	= pos.x * b + pos.y * d + ty;
+		result.x	= temx;
 		return result;
 	}
 

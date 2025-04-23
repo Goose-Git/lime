@@ -47,10 +47,15 @@
 #include <utils/compress/LZMA.h>
 #include <utils/compress/Zlib.h>
 #include <vm/NekoVM.h>
+#include <iostream>
+
+#include <SDL.h>
+
 
 #ifdef HX_WINDOWS
 #include <locale>
 #include <codecvt>
+#include <tinyfiledialogs.h>
 #endif
 #include <memory>
 
@@ -3230,17 +3235,26 @@ namespace lime {
 	}
 
 
-	value lime_window_create (value application, int width, int height, int flags, HxString title) {
+	value lime_window_create (value application, int width, int height, int flags, HxString title, value parentWnd ) {
 
-		Window* window = CreateWindow ((Application*)val_data (application), width, height, flags, hxs_utf8 (title, nullptr));
+        Window* targetParentWnd = NULL;
+
+        if ( parentWnd != NULL )
+            targetParentWnd = (Window*)val_data (parentWnd);
+
+		Window* window = CreateWindow ((Application*)val_data (application), width, height, flags, title.c_str (), targetParentWnd );
 		return CFFIPointer (window, gc_window);
-
 	}
 
 
-	HL_PRIM HL_CFFIPointer* HL_NAME(hl_window_create) (HL_CFFIPointer* application, int width, int height, int flags, hl_vstring* title) {
+	HL_PRIM HL_CFFIPointer* HL_NAME(hl_window_create) (HL_CFFIPointer* application, int width, int height, int flags, hl_vstring* title, HL_CFFIPointer* parentWnd) {
 
-		Window* window = CreateWindow ((Application*)application->ptr, width, height, flags, (const char*)hl_to_utf8 ((const uchar*)title->bytes));
+		Window* targetParentWnd = NULL;
+
+        if ( parentWnd != NULL )
+            targetParentWnd = (Window*)parentWnd->ptr;
+
+		Window* window = CreateWindow ((Application*)application->ptr, width, height, flags, (const char*)hl_to_utf8 ((const uchar*)title->bytes), targetParentWnd );
 		return HLCFFIPointer (window, (hl_finalizer)hl_gc_window);
 
 	}
@@ -3393,7 +3407,6 @@ namespace lime {
 		return targetWindow->GetMouseLock ();
 
 	}
-
 
 	double lime_window_get_opacity (value window) {
 
@@ -3927,6 +3940,266 @@ namespace lime {
 	}
 
 
+	int lime_get_global_mouse_x() {
+
+		int x; int y;
+		SDL_GetGlobalMouseState(&x, &y);
+		return x;
+
+	}
+
+
+	HL_PRIM int HL_NAME(hl_get_global_mouse_x)() {
+
+		int x; int y;
+		SDL_GetGlobalMouseState(&x, &y);
+		return x;
+
+	}
+
+
+	int lime_get_global_mouse_y() {
+
+		int x; int y;
+		SDL_GetGlobalMouseState(&x, &y);
+		return y;
+		
+	}
+
+
+	HL_PRIM int HL_NAME(hl_get_global_mouse_y)() {
+
+		int x; int y;
+		SDL_GetGlobalMouseState(&x, &y);
+		return y;
+
+	}
+
+
+	void lime_get_clipboard_image_size (value rect) {
+		
+		Rectangle _rect = Rectangle (rect);
+		Clipboard::GetImageSize( &_rect);
+	}
+
+
+	HL_PRIM void HL_NAME(hl_get_clipboard_image_size) (Rectangle* rect) {	
+
+		Clipboard::GetImageSize(rect);
+
+	}
+
+
+	void lime_get_clipboard_image_pixels (value image) {
+
+		Image _image = Image (image);
+		Clipboard::GetImagePixels( &_image);
+
+	}
+
+
+	HL_PRIM void HL_NAME(hl_get_clipboard_image_pixels)(Image* image) {	
+
+		Clipboard::GetImagePixels(image);
+
+	}
+
+	int lime_window_get_border_thickness (value window) {
+
+		Window* targetWindow = (Window*)val_data (window);
+		return targetWindow->GetBorderThickness ();
+
+	}
+
+	HL_PRIM int HL_NAME(hl_window_get_border_thickness) (HL_CFFIPointer* window) {
+
+		Window* targetWindow = (Window*)window->ptr;
+		return targetWindow->GetBorderThickness ();
+
+	}
+
+    int lime_window_get_titlebar_height (value window) {
+
+		Window* targetWindow = (Window*)val_data (window);
+		return targetWindow->GetTitlebarHeight ();
+
+	}
+
+	HL_PRIM int HL_NAME(hl_window_get_titlebar_height) (HL_CFFIPointer* window) {
+
+		Window* targetWindow = (Window*)window->ptr;
+		return targetWindow->GetTitlebarHeight ();
+
+	}
+
+	void lime_window_hide(value window, bool hide) {
+
+		Window* targetWindow = (Window*)val_data(window);
+		targetWindow->Hide(hide);
+
+	}
+
+	HL_PRIM void HL_NAME(hl_window_hide)(HL_CFFIPointer* window, bool hide) {
+
+		Window* targetWindow = (Window*)window->ptr;
+		targetWindow->Hide(hide);
+
+	}
+
+	int lime_window_get_hwnd(value window) {
+
+		Window* targetWindow = (Window*)val_data(window);
+		return targetWindow->hWnd;
+
+	}
+
+
+	HL_PRIM int HL_NAME(hl_window_get_hwnd)(HL_CFFIPointer* window) {
+
+		Window* targetWindow = (Window*)window->ptr;
+		return targetWindow->hWnd;
+
+	}
+
+	static int id_hwnd_array;
+	static bool init = false;
+
+	value lime_get_hwnd_depth_list(int parentHWnd)
+	{
+	#ifdef HX_WINDOWS
+		// === Look at SDLSystem.cpp - GetDisplay === that shows how to do it for cffi
+
+		if (!init) {
+			id_hwnd_array = val_id("hwnd_array");
+			init = true;
+		}
+
+		parentHWnd = 0;
+		int numWindows = Window::WindowList.size();
+
+		//printf("************** Windows in list = %d\n", numWindows);
+
+		value list_result = alloc_empty_object();
+		value hwnd_array = alloc_array(numWindows);
+
+		std::list<Window*>::iterator it;
+		HWND curWnd = GetTopWindow((HWND)parentHWnd);
+		HWND topWnd = curWnd;
+
+		curWnd = topWnd;
+		int hwndInList = 0;
+		while (curWnd != NULL) {
+			curWnd = GetNextWindow(curWnd, GW_HWNDNEXT);
+
+			// is this curWnd in our list of windows?
+			for (it = Window::WindowList.begin(); it != Window::WindowList.end(); it++)
+			{
+				if ((int)curWnd == (*it)->hWnd) {
+					
+					//val_array_set_i(hwnd_array, hwndInList, (value)((int)curWnd));
+
+					val_array_set_i(hwnd_array, hwndInList, alloc_int((int)curWnd) );
+					hwndInList++;
+					//printf("matched 1 window to %d\n", (int)curWnd);
+					break;
+				}
+			}
+
+			if (hwndInList >= numWindows)
+				break;
+		}
+
+		alloc_field(list_result, id_hwnd_array, hwnd_array);
+		return list_result;
+	#else
+		return alloc_empty_object();
+	#endif
+	}
+	
+	HL_PRIM vdynamic* HL_NAME(hl_get_hwnd_depth_list)(int parentHWnd)
+	{
+	#ifdef HX_WINDOWS
+		parentHWnd = 0;
+
+		// Go through all windows and create an array of HWNDs we can return
+		//============================
+		const int id_hwnd = hl_hash_utf8("hwnd");
+		const int id_hwndList = hl_hash_utf8("hwndList");
+
+		int numWindows = Window::WindowList.size();
+
+		// Create the result set object
+		vdynamic* list_result = (vdynamic*)hl_alloc_dynobj();
+
+		// --- Create array of hwnds - one for each window in our program ---
+		hl_varray* hwnd_array = (hl_varray*)hl_alloc_array(&hlt_dynobj, numWindows);
+		vdynamic** hwnd_array_data = hl_aptr(hwnd_array, vdynamic*);
+		hl_dyn_setp(list_result, id_hwndList, &hlt_array, hwnd_array);
+
+		std::list<Window*>::iterator it;
+		HWND curWnd = GetTopWindow((HWND)parentHWnd);
+		HWND topWnd = curWnd;
+
+		curWnd = topWnd;
+		int hwndInList = 0;
+		while (curWnd != NULL) {
+			curWnd = GetNextWindow(curWnd, GW_HWNDNEXT);
+
+			// is this curWnd in our list of windows?
+			for (it = Window::WindowList.begin(); it != Window::WindowList.end(); it++)
+			{
+				if ((int)curWnd == (*it)->hWnd) {
+					// We have a match for one of our windows
+					// Do the HL dynamic stuff
+					vdynamic* _field = (vdynamic*)hl_alloc_dynobj();
+					hl_dyn_seti(_field, id_hwnd, &hlt_i32, (int)curWnd);
+					*hwnd_array_data++ = _field;
+					hwndInList++;
+					// printf("matched 1 window to %d\n", (int)curWnd);
+					break;
+				}
+			}
+
+			if (hwndInList >= numWindows)
+				break;
+		}
+
+		return list_result;
+	#else
+		return NULL;
+	#endif
+	}
+
+	int messageBox(std::wstring* _title, std::wstring* _message, std::wstring* _type, std::wstring* _iconType, int buttonType) {
+	#ifdef LIME_TINYFILEDIALOGS
+			int res = tinyfd_messageBoxW(_title->c_str(), _message->c_str(), _type->c_str(), _iconType->c_str(), buttonType);
+			if (_title) delete _title;
+			if (_message) delete _message;
+			if (_type) delete _type;
+			if (_iconType) delete _iconType;
+			return res;
+	#endif
+			return 0;
+		}
+
+	int lime_messageBox(HxString title, HxString message, HxString type, HxString iconType, int buttonType) {
+		std::wstring* _title = hxstring_to_wstring(title);
+		std::wstring* _message = hxstring_to_wstring(message);
+		std::wstring* _type = hxstring_to_wstring(type);
+		std::wstring* _iconType = hxstring_to_wstring(iconType);
+		return messageBox(_title, _message, _type, _iconType, buttonType);
+	}
+
+
+	HL_PRIM int HL_NAME(hl_messageBox)(hl_vstring * title, hl_vstring * message, hl_vstring * type, hl_vstring * iconType, int buttonType) {
+		std::wstring* _title = hxstring_to_wstring(title);
+		std::wstring* _message = hxstring_to_wstring(message);
+		std::wstring* _type = hxstring_to_wstring(type);
+		std::wstring* _iconType = hxstring_to_wstring(iconType);
+		return messageBox(_title, _message, _type, _iconType, buttonType);
+	}
+
+
 	DEFINE_PRIME0 (lime_application_create);
 	DEFINE_PRIME2v (lime_application_event_manager_register);
 	DEFINE_PRIME1 (lime_application_exec);
@@ -4045,7 +4318,7 @@ namespace lime {
 	DEFINE_PRIME1 (lime_window_context_lock);
 	DEFINE_PRIME1v (lime_window_context_make_current);
 	DEFINE_PRIME1v (lime_window_context_unlock);
-	DEFINE_PRIME5 (lime_window_create);
+	DEFINE_PRIME6 (lime_window_create);
 	DEFINE_PRIME2v (lime_window_event_manager_register);
 	DEFINE_PRIME1v (lime_window_focus);
 	DEFINE_PRIME1 (lime_window_get_context);
@@ -4083,6 +4356,16 @@ namespace lime {
 	DEFINE_PRIME2v (lime_window_set_opacity);
 	DEFINE_PRIME2 (lime_zlib_compress);
 	DEFINE_PRIME2 (lime_zlib_decompress);
+	DEFINE_PRIME0 (lime_get_global_mouse_x);
+	DEFINE_PRIME0 (lime_get_global_mouse_y);
+	DEFINE_PRIME1v (lime_get_clipboard_image_size);
+	DEFINE_PRIME1v (lime_get_clipboard_image_pixels);
+	DEFINE_PRIME1 (lime_window_get_border_thickness);   
+	DEFINE_PRIME1 (lime_window_get_titlebar_height);    
+	DEFINE_PRIME2v (lime_window_hide);
+	DEFINE_PRIME1 (lime_window_get_hwnd);
+	DEFINE_PRIME1 (lime_get_hwnd_depth_list);
+	DEFINE_PRIME5 (lime_messageBox);
 
 
 	#define _ENUM "?"
@@ -4110,7 +4393,7 @@ namespace lime {
 	#define _TARRAYBUFFERVIEW _OBJ (_I32 _TARRAYBUFFER _I32 _I32 _I32 _I32)
 	#define _TAUDIOBUFFER _OBJ (_I32 _I32 _TARRAYBUFFERVIEW _I32 _DYN _DYN _DYN _DYN _DYN _TVORBISFILE)
 	#define _TIMAGEBUFFER _OBJ (_I32 _TARRAYBUFFERVIEW _I32 _I32 _BOOL _BOOL _I32 _DYN _DYN _DYN _DYN _DYN _DYN)
-	#define _TIMAGE _OBJ (_TIMAGEBUFFER _BOOL _I32 _I32 _I32 _TRECTANGLE _ENUM _I32 _I32 _F64 _F64)
+	#define _TIMAGE _OBJ (_TIMAGEBUFFER _BOOL _I32 _I32 _I32 _TRECTANGLE _ENUM _I32 _I32 _F64 _F64 _F64)
 
 	#define _TARRAY _OBJ (_BYTES _I32)
 	#define _TARRAY2 _OBJ (_ARR)
@@ -4233,7 +4516,7 @@ namespace lime {
 	DEFINE_HL_PRIM (_DYN, hl_window_context_lock, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_VOID, hl_window_context_make_current, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_VOID, hl_window_context_unlock, _TCFFIPOINTER);
-	DEFINE_HL_PRIM (_TCFFIPOINTER, hl_window_create, _TCFFIPOINTER _I32 _I32 _I32 _STRING);
+	DEFINE_HL_PRIM (_TCFFIPOINTER, hl_window_create, _TCFFIPOINTER _I32 _I32 _I32 _STRING _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_VOID, hl_window_event_manager_register, _FUN (_VOID, _NO_ARG) _TWINDOW_EVENT);
 	DEFINE_HL_PRIM (_VOID, hl_window_focus, _TCFFIPOINTER);
 	DEFINE_HL_PRIM (_F64, hl_window_get_context, _TCFFIPOINTER);
@@ -4271,8 +4554,16 @@ namespace lime {
 	DEFINE_HL_PRIM (_VOID, hl_window_set_opacity, _TCFFIPOINTER _F64);
 	DEFINE_HL_PRIM (_TBYTES, hl_zlib_compress, _TBYTES _TBYTES);
 	DEFINE_HL_PRIM (_TBYTES, hl_zlib_decompress, _TBYTES _TBYTES);
-
-
+	DEFINE_HL_PRIM (_I32, hl_get_global_mouse_x, _NO_ARG);
+	DEFINE_HL_PRIM (_I32, hl_get_global_mouse_y, _NO_ARG);
+	DEFINE_HL_PRIM( _VOID, hl_get_clipboard_image_size, _TRECTANGLE );
+	DEFINE_HL_PRIM( _VOID, hl_get_clipboard_image_pixels, _TIMAGE );
+	DEFINE_HL_PRIM (_I32, hl_window_get_border_thickness, _TCFFIPOINTER);         
+	DEFINE_HL_PRIM (_I32, hl_window_get_titlebar_height, _TCFFIPOINTER); 
+	DEFINE_HL_PRIM (_VOID, hl_window_hide, _TCFFIPOINTER _BOOL);
+	DEFINE_HL_PRIM( _I32, hl_window_get_hwnd, _TCFFIPOINTER);
+	DEFINE_HL_PRIM( _DYN, hl_get_hwnd_depth_list, _I32);
+	DEFINE_HL_PRIM (_I32, hl_messageBox, _STRING _STRING _STRING _STRING _I32 );	
 }
 
 
