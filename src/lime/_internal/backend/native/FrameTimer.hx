@@ -11,7 +11,7 @@ class FrameTimer{
     // ------------------------------------------------------------------------
 	// Name: ResetTime
 	// ------------------------------------------------------------------------
-    static inline public function GetTime():Float{
+    static /*inline*/ public function GetTime():Float{
         var t = __totalTimeMS;
         ResetTime();
         return t;
@@ -28,7 +28,7 @@ class FrameTimer{
     // ------------------------------------------------------------------------
 	// Name: StartTiming
 	// ------------------------------------------------------------------------
-    static #if INLINE_ON inline #end public function StartTiming(){
+    static /*#if INLINE_ON inline #end */public function StartTiming(){
         if ( __timeBlockCount == 0 ){
             __startTimeSec = Timer.stamp();
         }
@@ -42,7 +42,7 @@ class FrameTimer{
     // ------------------------------------------------------------------------
 	// Name: EndTiming
 	// ------------------------------------------------------------------------
-    static #if INLINE_ON inline #end public function EndTiming(){
+    static/* #if INLINE_ON inline #end*/ public function EndTiming(){
         __timeBlockCount--;
 
         if ( __timeBlockCount == 0 ){

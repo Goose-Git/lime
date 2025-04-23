@@ -345,6 +345,8 @@ class NativeApplication
 	private function handleMouseEvent():Void
 	{
 
+		FrameTimer.StartTiming();
+
 		// ----------------------
         // App-level Mouse Events
         // ----------------------
@@ -403,11 +405,14 @@ class NativeApplication
 				default:
 			}
 		}
+		FrameTimer.EndTiming();
 	}
 
 	private function handleRenderEvent():Void
 	{
 		// TODO: Allow windows to render independently
+
+		FrameTimer.StartTiming();
 
 		for (window in parent.__windows)
 		{
@@ -462,6 +467,8 @@ class NativeApplication
 					}
 			}
 		}
+
+		FrameTimer.EndTiming();
 	}
 
 	private function handleSensorEvent():Void
@@ -558,6 +565,8 @@ class NativeApplication
 
 	private function handleWindowEvent():Void
 	{
+		FrameTimer.StartTiming();
+
 		var window = parent.__windowByID.get(windowEventInfo.windowID);
 
 		if (window != null)
@@ -626,6 +635,8 @@ class NativeApplication
 					window.onHide.dispatch();
 			}
 		}
+
+		FrameTimer.EndTiming();
 	}
 
 	private function updateTimer():Void

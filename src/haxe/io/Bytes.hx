@@ -970,12 +970,12 @@ class Bytes
 		return pos < 0 || len < 0 || ((pos + len) : UInt) > (length : UInt);
 	}
 
-	public function get(pos:Int):Int
+	public inline function get(pos:Int):Int
 	{
 		return if (out(pos)) 0 else b[pos];
 	}
 
-	public function set(pos:Int, v:Int):Void
+	public inline function set(pos:Int, v:Int):Void
 	{
 		if (out(pos)) throw Error.OutsideBounds;
 		b[pos] = v;
@@ -1007,18 +1007,19 @@ class Bytes
 		return r;
 	}
 
-	public function getDouble(pos:Int):Float
+	public inline function getDouble(pos:Int):Float
 	{
-		return if (out(pos + 7)) 0.
-		else
-			b.getF64(pos);
+		return b.getF64(pos);
+
+		// Big gains from inlining
+		//return out(pos + 7) ? 0.0 : b.getF64(pos);
 	}
 
-	public function getFloat(pos:Int):Float
+	public inline function getFloat(pos:Int):Float
 	{
-		return if (out(pos + 3)) 0.
-		else
-			b.getF32(pos);
+		return b.getF32(pos);
+		// Big gains from inlining
+		//return out(pos + 3) ? 0.0 : b.getF32(pos);
 	}
 
 	public inline function setDouble(pos:Int, v:Float):Void
@@ -1031,6 +1032,7 @@ class Bytes
 	{
 		// Adding the inline here as this gave a massive boost in speed when calling this a lot
 		// which happens when setting up vertex data
+
 		//if (out(pos + 3)) throw Error.OutsideBounds;
 		b.setF32(pos, v);
 	}
