@@ -77,10 +77,9 @@ class HTML5Window
 	private var unusedTouchesPool = new List<Touch>();
 
 	private var __focusPending:Bool;
-
 	private var __stopMousePropagation = false;
 
-	public function new(parent:Window)
+	public function new(parent:Window, WindowParent:lime.ui.Window = null )
 	{
 		this.parent = parent;
 
