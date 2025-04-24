@@ -20,7 +20,9 @@
 		1EEEBAFC121BE2980048A9DF /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EEEBAFB121BE2980048A9DF /* AudioToolbox.framework */; };
 		1EEEBAFE121BE2980048A9DF /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EEEBAFD121BE2980048A9DF /* AVFoundation.framework */; };
 		1EEEBB00121BE2B30048A9DF /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EEEBAFF121BE2B30048A9DF /* Foundation.framework */; };
-		1EF0A83A121ADB8E003F2F59 /* Main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1EF0A839121ADB8E003F2F59 /* Main.mm */; };
+		1EF0A83A121ADB8E003F2F59 /* Main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1EF0A839121ADB8E003F2F59 /* Main.mm */; settings = {COMPILER_FLAGS = "-x objective-c++"; }; };
+		37E717F92D8D823A00470A8F /* EmptyButNecessary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E717F82D8D823A00470A8F /* EmptyButNecessary.swift */; };
+		::if SET_FIREBASE_INTEGRATION::37E717FB2D8D887600470A8F /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 37E717FA2D8D887600470A8F /* GoogleService-Info.plist */; };::end::
 		4257533F1A5EFD8C004AA45B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4257533E1A5EFD8C004AA45B /* Images.xcassets */; };
 		6892FA0E263B5BC100EA2669 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6892FA0D263B5BC100EA2669 /* Metal.framework */; };
 		792E75C91C6C876900D01DE0 /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 792E75C81C6C876900D01DE0 /* GameController.framework */; };
@@ -61,6 +63,8 @@
 		1EEEBAFD121BE2980048A9DF /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		1EEEBAFF121BE2B30048A9DF /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1EF0A839121ADB8E003F2F59 /* Main.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.mm; path = "::APP_FILE::/Classes/Main.mm"; sourceTree = SOURCE_ROOT; };
+		37E717F82D8D823A00470A8F /* EmptyButNecessary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EmptyButNecessary.swift; path = ::APP_FILE::/Classes/EmptyButNecessary.swift; sourceTree = SOURCE_ROOT; };
+		::if SET_FIREBASE_INTEGRATION::37E717FA2D8D887600470A8F /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "::APP_FILE::/app/GoogleService-Info.plist"; sourceTree = "<group>"; };::end::
 		4257533E1A5EFD8C004AA45B /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = "::APP_FILE::/Images.xcassets"; sourceTree = "<group>"; };
 		6662F3920A0E282007F4E3E /* ::APP_FILE::.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = "::APP_FILE::.entitlements"; path = "::APP_FILE::/::APP_FILE::.entitlements"; sourceTree = "<group>"; };
 		6892FA0D263B5BC100EA2669 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
@@ -107,6 +111,7 @@
 			isa = PBXGroup;
 			children = (
 				1EF0A839121ADB8E003F2F59 /* Main.mm */,
+				37E717F82D8D823A00470A8F /* EmptyButNecessary.swift */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -151,6 +156,7 @@
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
+				::if SET_FIREBASE_INTEGRATION::37E717FA2D8D887600470A8F /* GoogleService-Info.plist */,::end::
 			);
 			name = CustomTemplate;
 			sourceTree = "<group>";
@@ -222,12 +228,18 @@
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
 						::if DEVELOPMENT_TEAM_ID::DevelopmentTeam = ::DEVELOPMENT_TEAM_ID::;::end::
+						LastSwiftMigration = 1610;
 					};
 				};
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "::APP_TITLE::" */;
 			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+				Base,
+			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -246,6 +258,7 @@
 				1E2E17AD131E8B5D0048F3C7 /* ::APP_FILE::/assets in Resources */,
 				::if (IOS_LAUNCH_STORYBOARD != null)::D099CA9021A64C87003837AD /* ::IOS_LAUNCH_STORYBOARD::.storyboard in Resources */,::end::
 				4257533F1A5EFD8C004AA45B /* Images.xcassets in Resources */,
+				::if SET_FIREBASE_INTEGRATION::37E717FB2D8D887600470A8F /* GoogleService-Info.plist in Resources */,::end::
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,6 +270,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1EF0A83A121ADB8E003F2F59 /* Main.mm in Sources */,
+				37E717F92D8D823A00470A8F /* EmptyButNecessary.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -412,6 +426,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "::APP_PACKAGE::";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -466,6 +482,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "::APP_PACKAGE::";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 6.0;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
