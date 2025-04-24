@@ -4171,6 +4171,7 @@ namespace lime {
 	}
 
 	int messageBox(std::wstring* _title, std::wstring* _message, std::wstring* _type, std::wstring* _iconType, int buttonType) {
+	#ifndef IPHONE
 	#ifdef LIME_TINYFILEDIALOGS
 			int res = tinyfd_messageBoxW(_title->c_str(), _message->c_str(), _type->c_str(), _iconType->c_str(), buttonType);
 			if (_title) delete _title;
@@ -4178,6 +4179,7 @@ namespace lime {
 			if (_type) delete _type;
 			if (_iconType) delete _iconType;
 			return res;
+	#endif
 	#endif
 			return 0;
 		}
