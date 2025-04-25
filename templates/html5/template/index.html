@@ -24,6 +24,15 @@
 		}
 	</script>
 
+	::if SET_FIREBASE_INTEGRATION:: <!-- Lucy added 2025 -->
+	<script defer src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script> <!-- firebase core -->
+	<script defer src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script> <!-- firebase auth -->
+	<script defer src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script> <!-- Actual firebase ui sdk -->
+	<script src="lib/firebaseAuth.js"></script> <!-- gooseLogin firebaseAuth functions -->
+	<script defer src="lib/init-firebase.js"></script>
+	<link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
+	::end::
+
 	<style>
 		html,body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
 		#content { ::if (WIN_BACKGROUND)::background: #000000; ::end::width: ::if (WIN_RESIZABLE)::100%::elseif (WIN_WIDTH > 0)::::WIN_WIDTH::px::else::100%::end::; height: ::if (WIN_RESIZABLE)::100%::elseif (WIN_WIDTH > 0)::::WIN_HEIGHT::px::else::100%::end::; }
@@ -44,6 +53,10 @@
 	<script type="text/javascript">
 		lime.embed ("::APP_FILE::", "content", ::WIN_WIDTH::, ::WIN_HEIGHT::);
 	</script>
+	
+	::if SET_FIREBASE_INTEGRATION:: <!-- Lucy added 2025 -->
+	<div id="firebaseui-auth-container"></div>
+	::end::
 
 </body>
 </html>
