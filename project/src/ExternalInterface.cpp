@@ -4171,7 +4171,7 @@ namespace lime {
 	}
 
 	int messageBox(std::wstring* _title, std::wstring* _message, std::wstring* _type, std::wstring* _iconType, int buttonType) {
-	#ifndef IPHONE
+	#ifdef HX_WINDOWS
 	#ifdef LIME_TINYFILEDIALOGS
 			int res = tinyfd_messageBoxW(_title->c_str(), _message->c_str(), _type->c_str(), _iconType->c_str(), buttonType);
 			if (_title) delete _title;
@@ -4568,6 +4568,7 @@ namespace lime {
 	DEFINE_HL_PRIM (_I32, hl_messageBox, _STRING _STRING _STRING _STRING _I32 );	
 }
 
+extern "C" int lime_svg_register_prims ();
 
 #ifdef LIME_CAIRO
 extern "C" int lime_cairo_register_prims ();
@@ -4614,6 +4615,7 @@ extern "C" int lime_register_prims () {
 	lime_openal_register_prims ();
 	lime_opengl_register_prims ();
 	lime_vorbis_register_prims ();
+	lime_svg_register_prims ();
 
 	return 0;
 

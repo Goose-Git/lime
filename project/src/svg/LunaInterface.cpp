@@ -68,6 +68,8 @@ namespace lime {
 		return 1;
 	}
 
+	// ------------------------------------------------------------------------- PRIMS ---------------------------------
+
 	// ====================================================
 	// Name: lime_get_svg_width
 	// ====================================================
@@ -77,13 +79,11 @@ namespace lime {
 		if (!document) return 0;
 		return (int)document->width();
 	}
-	DEFINE_PRIME1(lime_get_svg_width);
-
+	
 	HL_PRIM int HL_NAME(hl_get_svg_width)(Bytes* bytes) {
 		return (int)get_svg_width(bytes->b, bytes->length);
 	}
-	DEFINE_HL_PRIM(_I32, hl_get_svg_width, _TBYTES);
-
+	
 	// ====================================================
 	// Name: lime_get_svg_height
 	// ====================================================
@@ -93,14 +93,11 @@ namespace lime {
 		if (!document) return 0;
 		return (int)document->height();
 	}
-	DEFINE_PRIME1(lime_get_svg_height);
-
+	
 	HL_PRIM int HL_NAME(hl_get_svg_height)(Bytes* bytes) {
 		return (int)get_svg_height(bytes->b, bytes->length);
 	}
-	DEFINE_HL_PRIM(_I32, hl_get_svg_height, _TBYTES);
 	
-
 	// ====================================================
     // Name: lime_load_svg_into_bitmap
     // ====================================================
@@ -117,9 +114,7 @@ namespace lime {
 			&imageBuffer
 		);
 	}
-	DEFINE_PRIME4(lime_load_svg_into_bitmap);
-
-
+	
 	// ====================================================
     // Name: hl_load_svg_into_bitmap
     // ====================================================
@@ -127,7 +122,18 @@ namespace lime {
 	{
 		return load_svg_into_bitmap_from_data(bytes->b, bytes->length, width, height, imageBuffer);
 	}
-	DEFINE_HL_PRIM(_I32, hl_load_svg_into_bitmap, _TBYTES _I32 _I32 _TIMAGEBUFFER);
 
+
+	DEFINE_PRIME1(lime_get_svg_width);
+	DEFINE_PRIME1(lime_get_svg_height);
+	DEFINE_PRIME4(lime_load_svg_into_bitmap);
+
+	DEFINE_HL_PRIM(_I32, hl_get_svg_width, _TBYTES);
+	DEFINE_HL_PRIM(_I32, hl_get_svg_height, _TBYTES);
+	DEFINE_HL_PRIM(_I32, hl_load_svg_into_bitmap, _TBYTES _I32 _I32 _TIMAGEBUFFER);
+}
+
+extern "C" int lime_svg_register_prims () {
+	return 0;
 }
 
