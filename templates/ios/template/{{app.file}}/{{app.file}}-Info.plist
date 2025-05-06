@@ -9,7 +9,7 @@
 		<string>::__current__::</string>::end::
 	</array>::end::
 	<key>CFBundleDisplayName</key>
-	<string>::APP_TITLE::</string>
+	<string>::if SET_SHORT_TITLE::::SET_SHORT_TITLE::::else::::APP_TITLE::::end::</string>
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIdentifier</key>
