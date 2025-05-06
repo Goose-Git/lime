@@ -599,7 +599,7 @@ class IOSPlatform extends PlatformTarget
 
 		if (icons.length == 0)
 		{
-			icons = [new Icon(System.findTemplate(project.templatePaths, "default/icon.svg"))];
+			icons = [/*new Icon(System.findTemplate(project.templatePaths, "default/icon.svg"))*/];
 		}
 
 		for (iconSize in iconSizes)

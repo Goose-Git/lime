@@ -561,7 +561,7 @@ class MacPlatform extends PlatformTarget
 
 		if (icons.length == 0)
 		{
-			icons = [new Icon(System.findTemplate(project.templatePaths, "default/icon.svg"))];
+			icons = [/*new Icon(System.findTemplate(project.templatePaths, "default/icon.svg"))*/];
 		}
 
 		context.HAS_ICON = IconHelper.createMacIcon(icons, Path.combine(contentDirectory, "icon.icns"));

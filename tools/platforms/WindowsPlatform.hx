@@ -233,7 +233,8 @@ class WindowsPlatform extends PlatformTarget
 
 		if (icons.length == 0)
 		{
-			icons = [new Icon(System.findTemplate(project.templatePaths, "default/icon.svg"))];
+			icons = [];
+			//icons = [new Icon(System.findTemplate(project.templatePaths, "default/icon.svg"))];
 		}
 
 		if (targetType == "winjs")

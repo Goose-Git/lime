@@ -572,7 +572,7 @@ class AndroidPlatform extends PlatformTarget
 
 			if (icons.length == 0)
 			{
-				icons = [new Icon(System.findTemplate(project.templatePaths, "default/icon.svg"))];
+				icons = [/*new Icon(System.findTemplate(project.templatePaths, "default/icon.svg"))*/];
 			}
 			for (i in 0...iconTypes.length)
 			{
