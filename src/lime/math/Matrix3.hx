@@ -359,6 +359,38 @@ abstract Matrix3(Float32Array) to Float32Array
 	}
 
 	/**
+	 * Sets this matrix to a 2D orthographic projection matrix.
+	 * @param left   Left bound of the view
+	 * @param right  Right bound of the view
+	 * @param top    Top bound of the view
+	 * @param bottom Bottom bound of the view
+	 * @param flipY  If true, inverts the Y-axis (default is false)
+	 */
+	public function setOrtho(left:Float, right:Float, top:Float, bottom:Float, flipY:Bool = false):Void {
+		var rl = right - left;
+		var tb = bottom - top;
+
+		if (rl == 0 || tb == 0) {
+			throw "Invalid bounds for orthographic projection";
+		}
+
+		a = 2.0 / rl;
+		c = 0.0;
+		tx = -(right + left) / rl;
+
+		if (flipY) {
+			b = 0.0;
+			d = -2.0 / tb;
+			ty = (bottom + top) / tb;
+		} else {
+			b = 0.0;
+			d = 2.0 / tb;
+			ty = -(bottom + top) / tb;
+		}
+	}
+
+
+	/**
 		Resets the matrix to default identity values
 	**/
 	public function identity():Void
@@ -634,6 +666,13 @@ abstract Matrix3(Float32Array) to Float32Array
 	{
 		this[index] = value;
 		return value;
+	}
+
+	// ------------------------------------------------------
+	// Name: isIdentity
+	// ------------------------------------------------------
+	public inline function isIdentity():Bool {
+		return a == 1 && b == 0 && c == 0 && d == 1 && tx == 0 && ty == 0;
 	}
 }
 

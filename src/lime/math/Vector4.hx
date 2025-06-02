@@ -291,6 +291,14 @@ class Vector4
 		z = za;
 	}
 
+	public inline function set(xa:Float, ya:Float, za:Float, wa:Float):Void
+	{
+		x = xa;
+		y = ya;
+		z = za;
+		w = wa;
+	}
+
 	/**
 		Subtracts the values of a second `Vector4` instance
 		from the current one
