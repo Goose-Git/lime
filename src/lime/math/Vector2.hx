@@ -73,6 +73,13 @@ class Vector2
 		return new Vector2(x, y);
 	}
 
+	public function copyFrom(other:Vector2):Void 
+	{
+		this.x = other.x;
+		this.y = other.y;
+	}
+
+
 	/**
 		Calculates the distance between two `Vector2` points
 		@param	pt1	A `Vector2` instance

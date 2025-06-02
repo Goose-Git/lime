@@ -424,4 +424,15 @@ class Rectangle
 		return null;
 		#end
 	}
+
+	// ------------------------------------------------------
+    // Name: round
+    // ------------------------------------------------------
+    public function round()
+	{
+		this.x = Std.int( this.x );
+		this.y = Std.int( this.y );
+		this.width = Std.int( this.width );
+		this.height = Std.int( this.height );
+	}
 }
