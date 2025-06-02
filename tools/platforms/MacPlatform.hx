@@ -186,11 +186,6 @@ class MacPlatform extends PlatformTarget
 			{
 				var targetSuffix = (targetType == "hl") ? ".hdll" : null;
 
-				// This is added to prevent arm64 versions of mac builds to be called lime-64.ndll (should just be lime.ndll)
-				if (ndll.name == "lime" && dirSuffix == "Arm64") {
-					targetSuffix = ".ndll"; // override any suffix logic
-				}
-
 				// TODO: Support single binary for HashLink
 				if (targetType == "hl")
 				{
@@ -202,6 +197,14 @@ class MacPlatform extends PlatformTarget
 						(ndll.haxelib != null
 							&& (ndll.haxelib.name == "hxcpp" || ndll.haxelib.name == "hxlibc")) ? ".dll" : ".ndll", executableDirectory,
 						project.debug, targetSuffix);
+				}
+			}
+
+			if (dirSuffix == "Arm64") {
+				var ndllPath64 = Path.combine(executableDirectory, "lime-64.ndll");
+				var ndllPath = Path.combine(executableDirectory, "lime.ndll");
+				if (FileSystem.exists(ndllPath64)) {
+					FileSystem.rename(ndllPath64, ndllPath);
 				}
 			}
 		}
