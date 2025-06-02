@@ -169,15 +169,15 @@ class MacPlatform extends PlatformTarget
 
 		if (!project.targetFlags.exists("static") || targetType != "cpp")
 		{
-			var targetSuffix = (targetType == "hl") ? ".hdll" : null;
-
-			// This is added to prevent arm64 versions of mac builds to be called lime-64.ndll (should just be lime.ndll)
-			if (ndll.name == "lime" && dirSuffix == "Arm64") {
-				targetSuffix = ".ndll"; // override any suffix logic
-			}
-
 			for (ndll in project.ndlls)
 			{
+				var targetSuffix = (targetType == "hl") ? ".hdll" : null;
+
+				// This is added to prevent arm64 versions of mac builds to be called lime-64.ndll (should just be lime.ndll)
+				if (ndll.name == "lime" && dirSuffix == "Arm64") {
+					targetSuffix = ".ndll"; // override any suffix logic
+				}
+
 				// TODO: Support single binary for HashLink
 				if (targetType == "hl")
 				{
