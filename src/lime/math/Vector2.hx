@@ -214,5 +214,10 @@ class Vector2
 	{
 		return (x * x + y * y);
 	}
+
+	public function toString():String
+	{
+		return "<"+x + "," + y + ">";
+	}
 	
 }
