@@ -98,6 +98,9 @@ class Application extends Module
     public var onMouseDownGlobal(default, null) = new Event<Float->Float->Int->Void>();
     public var onMouseUpGlobal(default, null) = new Event<Float->Float->Int->Void>();
 
+	/** Turning this on will half the framerate **/
+	public var batterySaverOn(get, set):Bool;
+
 	@:noCompletion private var __backend:ApplicationBackend;
 	@:noCompletion private var __preloader:Preloader;
 	@:noCompletion private var __window:Window;
@@ -648,6 +651,23 @@ class Application extends Module
 	}
 
 	// Get & Set Methods
+	@:noCompletion private inline function get_batterySaverOn():Bool
+	{
+		#if (hl || cpp)
+			return __backend.batterySaverOn;
+		#else
+			return false;
+		#end
+	}
+
+	@:noCompletion private inline function set_batterySaverOn(value:Bool):Bool
+	{
+		#if (hl || cpp)
+			__backend.batterySaverOn = value;
+		#end
+		return value;
+	}
+	
 	@:noCompletion private inline function get_preloader():Preloader
 	{
 		return __preloader;
