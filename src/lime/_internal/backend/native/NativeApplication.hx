@@ -68,6 +68,10 @@ class NativeApplication
 	private var parent:Application;
 	private var toggleFullscreen:Bool;
 
+	// Added 2025 (Greg) so we can reduce frame rate for battery saving
+	public var batterySaverOn:Bool = false;
+	private var frameCount:Int = 0;
+
 	private static function __init__()
 	{
 		#if (lime_cffi && !macro)
@@ -410,6 +414,10 @@ class NativeApplication
 
 	private function handleRenderEvent():Void
 	{
+		// Check for battery saver mode (miss every other frame)
+		if (batterySaverOn && (frameCount % 2) != 0) return;
+
+
 		// TODO: Allow windows to render independently
 
 		FrameTimer.StartTiming();
@@ -640,7 +648,11 @@ class NativeApplication
 	}
 
 	private function updateTimer():Void
-	{
+	{		
+		// Check for battery saver mode (miss every other frame)
+		frameCount++;
+		if (batterySaverOn && (frameCount % 2) != 0) return;
+
 		updateGlobalMouse();
 
 		#if (lime_cffi && !macro)
