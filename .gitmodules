@@ -18,17 +18,9 @@
 	path = project/lib/ogg
 	url = https://github.com/xiph/ogg
 	shallow = true
-[submodule "project/lib/zlib"]
-	path = project/lib/zlib
-	url = https://github.com/madler/zlib
-	shallow = true
 [submodule "project/lib/neko"]
 	path = project/lib/neko
 	url = https://github.com/HaxeFoundation/neko
-	shallow = true
-[submodule "project/lib/png"]
-	path = project/lib/png
-	url = https://github.com/glennrp/libpng
 	shallow = true
 [submodule "project/lib/jpeg"]
 	path = project/lib/jpeg
