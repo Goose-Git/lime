@@ -12,6 +12,11 @@
 //#import <FirebaseCore/FirebaseCore.h>
 ::end::
 
+::if SET_FACEBOOK_INTEGRATION::
+// Import Facebook (if you want to use Facebook):
+#import <GooseFacebook/GFacebook.h>
+::end::
+
 // refers to the copy of SDL_uikitappdelegate.h also in goose templates:
 #import "SDL_uikitappdelegate.h"
 
@@ -22,7 +27,7 @@
 @implementation GooseDelegate
 
 	// -------------------------------------
-	// didFinishLaunchingWithOptions 
+	// didFinishLaunchingWithOptions  (override)
 	// -------------------------------------
 	- (BOOL)application:(UIApplication *)application
 		didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -40,7 +45,41 @@
 		
 	::end::
 
+	::if SET_FACEBOOK_INTEGRATION::
+		// init Facebook:
+		//[GFacebook facebook_didFinishLaunching:application
+                        // launchOptions:launchOptions];
+		GFacebook_initFB(application,launchOptions);
+		
+	::end::
+
 		return ret;
+	}
+
+	// -------------------------------------
+	// openURL (override)
+	// -------------------------------------
+	- (BOOL)application:(UIApplication *)app
+				openURL:(NSURL *)url
+				options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
+	{
+		BOOL handled = false;
+		
+		NSLog(@"GooseDelegate openUrl");
+		// this function handles incoming callbacks when facebook logs in in browser, i think
+		::if SET_FACEBOOK_INTEGRATION::
+		//handled = [GFacebook GFacebook_handleOpenURL:app
+		//										url:url
+		//									options:options];
+		handled = GFacebook_handleOpenURL(app,url,options);
+
+		::end::
+		NSLog(@"GooseDelegate openUrl 2");
+
+		// Also let SDL handle it if Facebook didn’t
+		return handled || [super application:app
+									openURL:url
+									options:options];
 	}
 
 @end
