@@ -23,9 +23,11 @@
 	<key>CFBundleShortVersionString</key>
 	<string>::APP_VERSION::</string>
 	<key>CFBundleSignature</key>
-	<string>????</string>::if SET_FIREBASE_INTEGRATION::
+	<string>????</string>
+	
 	<key>CFBundleURLTypes</key>
 	<array>
+		::if SET_FIREBASE_INTEGRATION::
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
@@ -34,7 +36,31 @@
 				<string>::SET_REVERSED_CLIENT_ID::</string>
 			</array>
 		</dict>
-	</array>::end::
+		::end::
+		::if SET_FACEBOOK_INTEGRATION::
+		<dict>
+	  		<key>CFBundleURLSchemes</key>
+		  	<array>
+			<string>fb::SET_FACEBOOK_ID::</string>
+		  	</array>
+	  	</dict>
+		::end::
+	</array>
+	
+	::if SET_FACEBOOK_INTEGRATION::
+	<key>FacebookAppID</key>
+	<string>::SET_FACEBOOK_ID::</string>
+	<key>FacebookClientToken</key>
+	<string>::SET_FACEBOOK_CLIENT_TOKEN::</string>
+	<key>FacebookDisplayName</key>
+	<string>::APP_TITLE::</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+	</array>
+	::end::
+	
 	<key>CFBundleVersion</key>
 	<string>::APP_BUILD_NUMBER::</string>
 	<key>LSRequiresIPhoneOS</key>
