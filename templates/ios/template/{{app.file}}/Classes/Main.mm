@@ -40,7 +40,7 @@
 
 	::if SET_FIREBASE_INTEGRATION::
 		// init Firebase:
-		GFirebase_init(NULL);  // NULL is correct here, not nil
+		GFirebase_init();  // NULL is correct here, not nil
 	::end::
 
 	::if SET_FACEBOOK_INTEGRATION::
