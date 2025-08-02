@@ -8,7 +8,7 @@
 
 ::if SET_FIREBASE_INTEGRATION::
 // Import Firebase (if you want to use Firebase):
-#import <GooseLogin/GLogin.h>
+#import <GooseFirebase/GFirebase.h>
 //#import <FirebaseCore/FirebaseCore.h>
 ::end::
 
@@ -40,17 +40,12 @@
 
 	::if SET_FIREBASE_INTEGRATION::
 		// init Firebase:
-		//[FIRApp configure];
-		GLogin_init(NULL);  // NULL is correct here, not nil
-		
+		GFirebase_init(NULL);  // NULL is correct here, not nil
 	::end::
 
 	::if SET_FACEBOOK_INTEGRATION::
 		// init Facebook:
-		//[GFacebook facebook_didFinishLaunching:application
-                        // launchOptions:launchOptions];
 		GFacebook_initFB(application,launchOptions);
-		
 	::end::
 
 		return ret;
@@ -67,13 +62,9 @@
 		
 		NSLog(@"GooseDelegate openUrl");
 		// this function handles incoming callbacks when facebook logs in in browser, i think
-		::if SET_FACEBOOK_INTEGRATION::
-		//handled = [GFacebook GFacebook_handleOpenURL:app
-		//										url:url
-		//									options:options];
+	::if SET_FACEBOOK_INTEGRATION::
 		handled = GFacebook_handleOpenURL(app,url,options);
-
-		::end::
+	::end::
 		NSLog(@"GooseDelegate openUrl 2");
 
 		// Also let SDL handle it if Facebook didn’t
