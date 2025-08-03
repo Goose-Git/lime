@@ -7,6 +7,8 @@
 	<array>
 		<string>Default</string>
 	</array>
+	<key>aps-environment</key>
+	<string>development</string>
 	::end::
 	::if SET_NATIVE_LOGIN_INTEGRATION::
 	<key>com.apple.developer.applesignin</key>
