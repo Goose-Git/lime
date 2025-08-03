@@ -60,6 +60,14 @@
 		<string>fb-messenger-share-api</string>
 	</array>
 	::end::
+
+
+	::if SET_FIREBASE_INTEGRATION::
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
+	::end::
 	
 	<key>CFBundleVersion</key>
 	<string>::APP_BUILD_NUMBER::</string>
