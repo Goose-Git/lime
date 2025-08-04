@@ -13,6 +13,7 @@ buildscript {
 		
 		::if SET_FIREBASE_INTEGRATION:: // Lucy added 2025
 		classpath 'com.google.gms:google-services:4.4.2'  // Google Services plugin
+		classpath 'com.google.firebase:firebase-crashlytics-gradle:3.0.5'
 		::end::
 	}
 }
