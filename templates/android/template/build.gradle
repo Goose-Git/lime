@@ -21,7 +21,19 @@ allprojects {
 	repositories {
 		mavenCentral()
 		google()
-	}::if ANDROID_GRADLE_BUILD_DIRECTORY::
+	}
+	
+	// Added 04-08-2025 (Greg) as I was getting duplicate class errors on android - chatGPT
+	// came up with this, it forces everything to use the same version of kotlin apparently.
+	configurations.all {
+		resolutionStrategy {
+			force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+			force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22'
+			force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22'
+		}
+	}
+	
+	::if ANDROID_GRADLE_BUILD_DIRECTORY::
 	buildDir = "::ANDROID_GRADLE_BUILD_DIRECTORY::/::APP_FILE::/${project.name}"::end::
 }
 
