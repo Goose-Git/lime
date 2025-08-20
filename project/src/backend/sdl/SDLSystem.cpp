@@ -39,10 +39,10 @@
 #include <SDL.h>
 #include <string>
 
-#ifdef HX_WINDOWS
 #include <locale>
 #include <codecvt>
-#endif
+
+using wstring_convert = std::wstring_convert<std::codecvt_utf8<wchar_t>>;
 
 
 namespace lime {
@@ -237,13 +237,15 @@ namespace lime {
 			case APPLICATION: {
 
 				char* path = SDL_GetBasePath ();
-				#ifdef HX_WINDOWS
-				std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-				result = new std::wstring (converter.from_bytes(path));
-				#else
-				result = new std::wstring (path, path + strlen (path));
-				#endif
-				SDL_free (path);
+
+				if (path != nullptr) {
+
+					wstring_convert converter;
+					result = new std::wstring (converter.from_bytes(path));
+					SDL_free (path);
+
+				}
+
 				break;
 
 			}
@@ -251,13 +253,15 @@ namespace lime {
 			case APPLICATION_STORAGE: {
 
 				char* path = SDL_GetPrefPath (company, title);
-				#ifdef HX_WINDOWS
-				std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-				result = new std::wstring (converter.from_bytes(path));
-				#else
-				result = new std::wstring (path, path + strlen (path));
-				#endif
-				SDL_free (path);
+
+				if (path != nullptr) {
+
+        			wstring_convert converter;
+					result = new std::wstring (converter.from_bytes(path));
+					SDL_free (path);
+
+				}
+
 				break;
 
 			}
@@ -271,11 +275,9 @@ namespace lime {
 
 				#elif defined (HX_WINDOWS)
 
-				char folderPath[MAX_PATH] = "";
-				SHGetFolderPath (NULL, CSIDL_DESKTOPDIRECTORY, NULL, SHGFP_TYPE_CURRENT, folderPath);
-				//WIN_StringToUTF8 (folderPath);
-				std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-				result = new std::wstring (converter.from_bytes (folderPath));
+				WCHAR folderPath[MAX_PATH] = L"";
+				SHGetFolderPathW (NULL, CSIDL_DESKTOPDIRECTORY, NULL, SHGFP_TYPE_CURRENT, folderPath);
+				result = new std::wstring (folderPath);
 
 				#elif defined (IPHONE)
 
@@ -285,14 +287,13 @@ namespace lime {
 
 				char const* home = getenv ("HOME");
 
-				if (home == NULL) {
+				if (home != NULL) {
 
-					return 0;
+					std::string path = std::string (home) + std::string ("/Desktop");
+					wstring_convert converter;
+					result = new std::wstring (converter.from_bytes(path));
 
 				}
-
-				std::string path = std::string (home) + std::string ("/Desktop");
-				result = new std::wstring (path.begin (), path.end ());
 
 				#endif
 				break;
@@ -308,11 +309,9 @@ namespace lime {
 
 				#elif defined (HX_WINDOWS)
 
-				char folderPath[MAX_PATH] = "";
-				SHGetFolderPath (NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, folderPath);
-				//WIN_StringToUTF8 (folderPath);
-				std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-				result = new std::wstring (converter.from_bytes (folderPath));
+				WCHAR folderPath[MAX_PATH] = L"";
+				SHGetFolderPathW (NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, folderPath);
+				result = new std::wstring (folderPath);
 
 				#elif defined (IPHONE)
 
@@ -329,7 +328,8 @@ namespace lime {
 				if (home != NULL) {
 
 					std::string path = std::string (home) + std::string ("/Documents");
-					result = new std::wstring (path.begin (), path.end ());
+					wstring_convert converter;
+					result = new std::wstring (converter.from_bytes(path));
 
 				}
 
@@ -346,11 +346,9 @@ namespace lime {
 
 				#elif defined (HX_WINDOWS)
 
-				char folderPath[MAX_PATH] = "";
-				SHGetFolderPath (NULL, CSIDL_FONTS, NULL, SHGFP_TYPE_CURRENT, folderPath);
-				//WIN_StringToUTF8 (folderPath);
-				std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-				result = new std::wstring (converter.from_bytes (folderPath));
+				WCHAR folderPath[MAX_PATH] = L"";
+				SHGetFolderPathW (NULL, CSIDL_FONTS, NULL, SHGFP_TYPE_CURRENT, folderPath);
+				result = new std::wstring (folderPath);
 
 				#elif defined (HX_MACOS)
 
@@ -386,11 +384,9 @@ namespace lime {
 
 				#elif defined (HX_WINDOWS)
 
-				char folderPath[MAX_PATH] = "";
-				SHGetFolderPath (NULL, CSIDL_PROFILE, NULL, SHGFP_TYPE_CURRENT, folderPath);
-				//WIN_StringToUTF8 (folderPath);
-				std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-				result = new std::wstring (converter.from_bytes (folderPath));
+				WCHAR folderPath[MAX_PATH] = L"";
+				SHGetFolderPathW (NULL, CSIDL_PROFILE, NULL, SHGFP_TYPE_CURRENT, folderPath);
+				result = new std::wstring (folderPath);
 
 				#elif defined (IPHONE)
 
@@ -407,7 +403,8 @@ namespace lime {
 				if (home != NULL) {
 
 					std::string path = std::string (home);
-					result = new std::wstring (path.begin (), path.end ());
+					wstring_convert converter;
+					result = new std::wstring (converter.from_bytes(path));
 
 				}
 
