@@ -84,7 +84,9 @@ class AndroidPlatform extends PlatformTarget
 
 		if (project.targetFlags.exists("simulator") || project.targetFlags.exists("emulator"))
 		{
-			defaults.architectures = [Architecture.X86];
+			// changed for Commit d21f7be
+			//defaults.architectures = [Architecture.X86];
+			defaults.architectures = [Architecture.X64];
 		}
 		else
 		{
@@ -368,8 +370,13 @@ class AndroidPlatform extends PlatformTarget
 			|| ArrayTools.containsValue(project.architectures, Architecture.ARMV6));
 		var armv7 = (command == "rebuild" || ArrayTools.containsValue(project.architectures, Architecture.ARMV7));
 		var arm64 = (command == "rebuild" || ArrayTools.containsValue(project.architectures, Architecture.ARM64));
-		var x86 = (command == "rebuild" || ArrayTools.containsValue(project.architectures, Architecture.X86));
-		var x64 = (/*command == "rebuild" ||*/ ArrayTools.containsValue(project.architectures, Architecture.X64));
+		
+		//var x86 = (command == "rebuild" || ArrayTools.containsValue(project.architectures, Architecture.X86));
+		//var x64 = (/*command == "rebuild" ||*/ ArrayTools.containsValue(project.architectures, Architecture.X64));
+		
+		// Added from Commit d21f7be
+		var x86 = (ArrayTools.containsValue(project.architectures, Architecture.X86));
+		var x64 = (command == "rebuild" || ArrayTools.containsValue(project.architectures, Architecture.X64));
 
 		var commands = [];
 
