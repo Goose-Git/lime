@@ -109,6 +109,24 @@ class AndroidPlatform extends PlatformTarget
 			project.architectures.remove(excludeArchitecture);
 		}
 
+		// ---------------------
+		// Added 2025
+		// To ONLY build a specific Architecture use these (to speed things up)
+		// GOOSE
+		// GREGDENNESS
+		//
+		// lime test android -debug -no_arm7
+		//
+		// This is what you would want to test on modern phones with (dont usally need arm7)
+		if ( project.targetFlags.exists("no_arm7") || project.targetFlags.exists("quick"))
+			project.architectures.remove(Architecture.ARMV7);
+
+		if ( project.targetFlags.exists("no_arm64"))
+			project.architectures.remove(Architecture.ARM64);
+
+		trace("Building Architectures: " + project.architectures);
+		// ---------------------
+
 		if (command != "display" && command != "clean")
 		{
 			// project = project.clone ();
