@@ -14,8 +14,4 @@ class GlyphMetrics
 	public var verticalBearing:Vector2;
 
 	public function new() {}
-
-	public function getAdvanceXInPixels():Float{
-		return advance.x / 64.0; 
-	}
 }
