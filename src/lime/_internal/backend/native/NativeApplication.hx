@@ -1,5 +1,7 @@
 package lime._internal.backend.native;
 
+import lime.app.Event;
+import haxe.Exception;
 import haxe.Timer;
 import lime._internal.backend.native.NativeCFFI;
 import lime.app.Application;
@@ -67,6 +69,8 @@ class NativeApplication
 	private var pauseTimer:Int;
 	private var parent:Application;
 	private var toggleFullscreen:Bool;
+
+	public var onException:Event<Exception->Void> = new Event<Exception->Void>();
 
 	private static function __init__()
 	{
@@ -170,21 +174,36 @@ class NativeApplication
 		#end
 	}
 
+	// GREGDENNESS GOOSE
+	// Added 2025
+	private function handleException(e:Exception):Void
+	{
+		// Call the CCrashReporter
+		trace("==== CRASH DETECTED ====");
+		trace("==== haxe exception handled: " + e.message);
+		onException.dispatch(e);
+	}
+
 	private function handleApplicationEvent():Void
 	{
-		FrameTimer.StartTiming();
+		try{
+			FrameTimer.StartTiming();
 
-		switch (applicationEventInfo.type)
-		{
-			case UPDATE:
-				updateTimer();
+			switch (applicationEventInfo.type)
+			{
+				case UPDATE:
+					updateTimer();
 
-				parent.onUpdate.dispatch(applicationEventInfo.deltaTime);
+					parent.onUpdate.dispatch(applicationEventInfo.deltaTime);
 
-			default:
+				default:
+			}
+
+			FrameTimer.EndTiming();
 		}
-
-		FrameTimer.EndTiming();
+		catch(e:Exception){
+			handleException(e);
+		}
 	}
 
 	private function handleClipboardEvent():Void
@@ -261,381 +280,415 @@ class NativeApplication
 
 	private function handleKeyEvent():Void
 	{
-		var window = parent.__windowByID.get(keyEventInfo.windowID);
+		try{
+			var window = parent.__windowByID.get(keyEventInfo.windowID);
 
-		if (window != null)
-		{
-			// Do not process events for hidden windows
-			if ( window.hidden)
-				return;
-
-			var type:KeyEventType = keyEventInfo.type;
-			var int32:Float = keyEventInfo.keyCode;
-			var keyCode:KeyCode = Std.int(int32);
-			var modifier:KeyModifier = keyEventInfo.modifier;
-
-			switch (type)
+			if (window != null)
 			{
-				case KEY_DOWN:
-					window.onKeyDown.dispatch(keyCode, modifier);
+				// Do not process events for hidden windows
+				if ( window.hidden)
+					return;
 
-				case KEY_UP:
-					window.onKeyUp.dispatch(keyCode, modifier);
-			}
+				var type:KeyEventType = keyEventInfo.type;
+				var int32:Float = keyEventInfo.keyCode;
+				var keyCode:KeyCode = Std.int(int32);
+				var modifier:KeyModifier = keyEventInfo.modifier;
 
-			#if (windows || linux)
-			if (keyCode == RETURN)
-			{
-				if (type == KEY_DOWN)
+				switch (type)
 				{
-					if (toggleFullscreen && modifier.altKey && (!modifier.ctrlKey && !modifier.shiftKey && !modifier.metaKey))
-					{
-						toggleFullscreen = false;
+					case KEY_DOWN:
+						window.onKeyDown.dispatch(keyCode, modifier);
 
-						if (!window.onKeyDown.canceled)
+					case KEY_UP:
+						window.onKeyUp.dispatch(keyCode, modifier);
+				}
+
+				#if (windows || linux)
+				if (keyCode == RETURN)
+				{
+					if (type == KEY_DOWN)
+					{
+						if (toggleFullscreen && modifier.altKey && (!modifier.ctrlKey && !modifier.shiftKey && !modifier.metaKey))
 						{
-							window.fullscreen = !window.fullscreen;
+							toggleFullscreen = false;
+
+							if (!window.onKeyDown.canceled)
+							{
+								window.fullscreen = !window.fullscreen;
+							}
 						}
 					}
-				}
-				else
-				{
-					toggleFullscreen = true;
-				}
-			}
-
-			#if rpi
-			if (keyCode == ESCAPE && modifier.ctrlKey && type == KEY_DOWN)
-			{
-				System.exit(0);
-			}
-			#end
-			#elseif mac
-			if (keyCode == F)
-			{
-				if (type == KEY_DOWN)
-				{
-					if (toggleFullscreen && (modifier.ctrlKey && modifier.metaKey) && (!modifier.altKey && !modifier.shiftKey))
+					else
 					{
-						toggleFullscreen = false;
-
-						if (!window.onKeyDown.canceled)
-						{
-							window.fullscreen = !window.fullscreen;
-						}
+						toggleFullscreen = true;
 					}
 				}
-				else
-				{
-					toggleFullscreen = true;
-				}
-			}
-			#elseif android
-			if (keyCode == APP_CONTROL_BACK && modifier == KeyModifier.NONE && type == KEY_UP && !window.onKeyUp.canceled)
-			{
-				var mainActivity = JNI.createStaticField("org/haxe/extension/Extension", "mainActivity", "Landroid/app/Activity;");
-				var moveTaskToBack = JNI.createMemberMethod("android/app/Activity", "moveTaskToBack", "(Z)Z");
 
-				moveTaskToBack(mainActivity.get(), true);
+				#if rpi
+				if (keyCode == ESCAPE && modifier.ctrlKey && type == KEY_DOWN)
+				{
+					System.exit(0);
+				}
+				#end
+				#elseif mac
+				if (keyCode == F)
+				{
+					if (type == KEY_DOWN)
+					{
+						if (toggleFullscreen && (modifier.ctrlKey && modifier.metaKey) && (!modifier.altKey && !modifier.shiftKey))
+						{
+							toggleFullscreen = false;
+
+							if (!window.onKeyDown.canceled)
+							{
+								window.fullscreen = !window.fullscreen;
+							}
+						}
+					}
+					else
+					{
+						toggleFullscreen = true;
+					}
+				}
+				#elseif android
+				if (keyCode == APP_CONTROL_BACK && modifier == KeyModifier.NONE && type == KEY_UP && !window.onKeyUp.canceled)
+				{
+					var mainActivity = JNI.createStaticField("org/haxe/extension/Extension", "mainActivity", "Landroid/app/Activity;");
+					var moveTaskToBack = JNI.createMemberMethod("android/app/Activity", "moveTaskToBack", "(Z)Z");
+
+					moveTaskToBack(mainActivity.get(), true);
+				}
+				#end
 			}
-			#end
+		}
+		catch(e:Exception){
+			handleException(e);
 		}
 	}
 
 	private function handleMouseEvent():Void
 	{
+		try{
+			FrameTimer.StartTiming();
 
-		FrameTimer.StartTiming();
+			// ----------------------
+			// App-level Mouse Events
+			// ----------------------
+			// Check for App-level mouse events - for mouse events which happen outside of any window
+			if ( mouseEventInfo.windowID == -1 ){
 
-		// ----------------------
-        // App-level Mouse Events
-        // ----------------------
-        // Check for App-level mouse events - for mouse events which happen outside of any window
-        if ( mouseEventInfo.windowID == -1 ){
+				switch (mouseEventInfo.type)
+				{
+					case MOUSE_DOWN:
+						parent.onMouseDownGlobal.dispatch( mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button );
+					case MOUSE_UP:
 
-            switch (mouseEventInfo.type)
-			{
-				case MOUSE_DOWN:
-                    parent.onMouseDownGlobal.dispatch( mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button );
-                case MOUSE_UP:
-
-					// BUG
-					// ===
-					// We dont seem to be getting this when we are clicking into a new window for the first time.
-					// See the section below of the hack we use to get around this.
-					//
-					// This might need a look into how C++/SDL is providing these events
-                    parent.onMouseUpGlobal.dispatch( mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button );
-                default:
-            }
-        }
-
-		var window = parent.__windowByID.get(mouseEventInfo.windowID);
-
-		if (window != null && !window.hidden)
-		{
-			switch (mouseEventInfo.type)
-			{
-				case MOUSE_DOWN:
-					window.clickCount = mouseEventInfo.clickCount;
-					window.onMouseDown.dispatch(mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button);
-					window.clickCount = 0;
-
-				case MOUSE_UP:
-					window.clickCount = mouseEventInfo.clickCount;
-					window.onMouseUp.dispatch(mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button);
-
-					// Mouse Up hack
-					// ===================
-					// 11-07-2024 - Hack to make Mouse Up work when you first click into a window. This does mean 
-					// we're probably getting 2 mouse up events each time - and one with the wrong coordinates.
-					// Update:
-					// I had to leave the above mouseUp on the local window in
-					parent.onMouseUpGlobal.dispatch( mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button );
-
-					window.clickCount = 0;
-
-				case MOUSE_MOVE:
-					window.onMouseMove.dispatch(mouseEventInfo.x, mouseEventInfo.y);
-					window.onMouseMoveRelative.dispatch(mouseEventInfo.movementX, mouseEventInfo.movementY);
-
-				case MOUSE_WHEEL:
-					window.onMouseWheel.dispatch(mouseEventInfo.x, mouseEventInfo.y, UNKNOWN);
-
-				default:
+						// BUG
+						// ===
+						// We dont seem to be getting this when we are clicking into a new window for the first time.
+						// See the section below of the hack we use to get around this.
+						//
+						// This might need a look into how C++/SDL is providing these events
+						parent.onMouseUpGlobal.dispatch( mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button );
+					default:
+				}
 			}
+
+			var window = parent.__windowByID.get(mouseEventInfo.windowID);
+
+			if (window != null && !window.hidden)
+			{
+				switch (mouseEventInfo.type)
+				{
+					case MOUSE_DOWN:
+						window.clickCount = mouseEventInfo.clickCount;
+						window.onMouseDown.dispatch(mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button);
+						window.clickCount = 0;
+
+					case MOUSE_UP:
+						window.clickCount = mouseEventInfo.clickCount;
+						window.onMouseUp.dispatch(mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button);
+
+						// Mouse Up hack
+						// ===================
+						// 11-07-2024 - Hack to make Mouse Up work when you first click into a window. This does mean 
+						// we're probably getting 2 mouse up events each time - and one with the wrong coordinates.
+						// Update:
+						// I had to leave the above mouseUp on the local window in
+						parent.onMouseUpGlobal.dispatch( mouseEventInfo.x, mouseEventInfo.y, mouseEventInfo.button );
+
+						window.clickCount = 0;
+
+					case MOUSE_MOVE:
+						window.onMouseMove.dispatch(mouseEventInfo.x, mouseEventInfo.y);
+						window.onMouseMoveRelative.dispatch(mouseEventInfo.movementX, mouseEventInfo.movementY);
+
+					case MOUSE_WHEEL:
+						window.onMouseWheel.dispatch(mouseEventInfo.x, mouseEventInfo.y, UNKNOWN);
+
+					default:
+				}
+			}
+			FrameTimer.EndTiming();
 		}
-		FrameTimer.EndTiming();
+		catch(e:Exception){
+			handleException(e);
+		}
 	}
 
 	private function handleRenderEvent():Void
 	{
-		// TODO: Allow windows to render independently
-		FrameTimer.StartTiming();
+		try{
+			// TODO: Allow windows to render independently
+			FrameTimer.StartTiming();
 
-		for (window in parent.__windows)
-		{
-			if (window == null) continue;
-
-			// parent.renderer = renderer;
-
-			// Do not process events for hidden windows
-            if ( window.hidden)
-                continue;
-
-			switch (renderEventInfo.type)
+			for (window in parent.__windows)
 			{
-				case RENDER:
-					if (window.context != null)
-					{
-						window.__backend.render();
-						window.onRender.dispatch(window.context);
+				if (window == null) continue;
 
-						if (!window.onRender.canceled)
+				// parent.renderer = renderer;
+
+				// Do not process events for hidden windows
+				if ( window.hidden)
+					continue;
+
+				switch (renderEventInfo.type)
+				{
+					case RENDER:
+						if (window.context != null)
 						{
-							window.__backend.contextFlip();
-						}
-					}
+							window.__backend.render();
+							window.onRender.dispatch(window.context);
 
-				case RENDER_CONTEXT_LOST:
-					if (window.__backend.useHardware && window.context != null)
-					{
-						switch (window.context.type)
-						{
-							case OPENGL, OPENGLES, WEBGL:
-								#if (lime_cffi && (lime_opengl || lime_opengles) && !display)
-								var gl = window.context.gl;
-								(gl : NativeOpenGLRenderContext).__contextLost();
-								if (GL.context == gl) GL.context = null;
-								#end
-
-							default:
+							if (!window.onRender.canceled)
+							{
+								window.__backend.contextFlip();
+							}
 						}
 
-						window.context = null;
-						window.onRenderContextLost.dispatch();
-					}
+					case RENDER_CONTEXT_LOST:
+						if (window.__backend.useHardware && window.context != null)
+						{
+							switch (window.context.type)
+							{
+								case OPENGL, OPENGLES, WEBGL:
+									#if (lime_cffi && (lime_opengl || lime_opengles) && !display)
+									var gl = window.context.gl;
+									(gl : NativeOpenGLRenderContext).__contextLost();
+									if (GL.context == gl) GL.context = null;
+									#end
 
-				case RENDER_CONTEXT_RESTORED:
-					if (window.__backend.useHardware)
-					{
-						// GL.context = new OpenGLRenderContext ();
-						// window.context.gl = GL.context;
+								default:
+							}
 
-						window.onRenderContextRestored.dispatch(window.context);
-					}
+							window.context = null;
+							window.onRenderContextLost.dispatch();
+						}
+
+					case RENDER_CONTEXT_RESTORED:
+						if (window.__backend.useHardware)
+						{
+							// GL.context = new OpenGLRenderContext ();
+							// window.context.gl = GL.context;
+
+							window.onRenderContextRestored.dispatch(window.context);
+						}
+				}
 			}
-		}
 
-		FrameTimer.EndTiming();
+			FrameTimer.EndTiming();
+		}
+		catch(e:Exception){
+			handleException(e);
+		}
 	}
 
 	private function handleSensorEvent():Void
 	{
-		var sensor = Sensor.sensorByID.get(sensorEventInfo.id);
+		try{
+			var sensor = Sensor.sensorByID.get(sensorEventInfo.id);
 
-		if (sensor != null)
-		{
-			sensor.onUpdate.dispatch(sensorEventInfo.x, sensorEventInfo.y, sensorEventInfo.z);
+			if (sensor != null)
+			{
+				sensor.onUpdate.dispatch(sensorEventInfo.x, sensorEventInfo.y, sensorEventInfo.z);
+			}
+		}
+		catch(e:Exception){
+			handleException(e);
 		}
 	}
 
 	private function handleTextEvent():Void
 	{
-		var window = parent.__windowByID.get(textEventInfo.windowID);
+		try{
+			var window = parent.__windowByID.get(textEventInfo.windowID);
 
-		if (window != null)
-		{
-			switch (textEventInfo.type)
+			if (window != null)
 			{
-				case TEXT_INPUT:
-					window.onTextInput.dispatch(CFFI.stringValue(textEventInfo.text));
+				switch (textEventInfo.type)
+				{
+					case TEXT_INPUT:
+						window.onTextInput.dispatch(CFFI.stringValue(textEventInfo.text));
 
-				case TEXT_EDIT:
-					window.onTextEdit.dispatch(CFFI.stringValue(textEventInfo.text), textEventInfo.start,
-						textEventInfo.length);
+					case TEXT_EDIT:
+						window.onTextEdit.dispatch(CFFI.stringValue(textEventInfo.text), textEventInfo.start,
+							textEventInfo.length);
 
-				default:
+					default:
+				}
 			}
+		}
+		catch(e:Exception){
+			handleException(e);
 		}
 	}
 
 	private function handleTouchEvent():Void
 	{
-		switch (touchEventInfo.type)
-		{
-			case TOUCH_START:
-				var touch = unusedTouchesPool.pop();
+		try{
+			switch (touchEventInfo.type)
+			{
+				case TOUCH_START:
+					var touch = unusedTouchesPool.pop();
 
-				if (touch == null)
-				{
-					touch = new Touch(touchEventInfo.x, touchEventInfo.y, touchEventInfo.id, touchEventInfo.dx, touchEventInfo.dy, touchEventInfo.pressure,
-						touchEventInfo.device);
-				}
-				else
-				{
-					touch.x = touchEventInfo.x;
-					touch.y = touchEventInfo.y;
-					touch.id = touchEventInfo.id;
-					touch.dx = touchEventInfo.dx;
-					touch.dy = touchEventInfo.dy;
-					touch.pressure = touchEventInfo.pressure;
-					touch.device = touchEventInfo.device;
-				}
+					if (touch == null)
+					{
+						touch = new Touch(touchEventInfo.x, touchEventInfo.y, touchEventInfo.id, touchEventInfo.dx, touchEventInfo.dy, touchEventInfo.pressure,
+							touchEventInfo.device);
+					}
+					else
+					{
+						touch.x = touchEventInfo.x;
+						touch.y = touchEventInfo.y;
+						touch.id = touchEventInfo.id;
+						touch.dx = touchEventInfo.dx;
+						touch.dy = touchEventInfo.dy;
+						touch.pressure = touchEventInfo.pressure;
+						touch.device = touchEventInfo.device;
+					}
 
-				currentTouches.set(touch.id, touch);
+					currentTouches.set(touch.id, touch);
 
-				Touch.onStart.dispatch(touch);
+					Touch.onStart.dispatch(touch);
 
-			case TOUCH_END:
-				var touch = currentTouches.get(touchEventInfo.id);
+				case TOUCH_END:
+					var touch = currentTouches.get(touchEventInfo.id);
 
-				if (touch != null)
-				{
-					touch.x = touchEventInfo.x;
-					touch.y = touchEventInfo.y;
-					touch.dx = touchEventInfo.dx;
-					touch.dy = touchEventInfo.dy;
-					touch.pressure = touchEventInfo.pressure;
+					if (touch != null)
+					{
+						touch.x = touchEventInfo.x;
+						touch.y = touchEventInfo.y;
+						touch.dx = touchEventInfo.dx;
+						touch.dy = touchEventInfo.dy;
+						touch.pressure = touchEventInfo.pressure;
 
-					Touch.onEnd.dispatch(touch);
+						Touch.onEnd.dispatch(touch);
 
-					currentTouches.remove(touchEventInfo.id);
-					unusedTouchesPool.add(touch);
-				}
+						currentTouches.remove(touchEventInfo.id);
+						unusedTouchesPool.add(touch);
+					}
 
-			case TOUCH_MOVE:
-				var touch = currentTouches.get(touchEventInfo.id);
+				case TOUCH_MOVE:
+					var touch = currentTouches.get(touchEventInfo.id);
 
-				if (touch != null)
-				{
-					touch.x = touchEventInfo.x;
-					touch.y = touchEventInfo.y;
-					touch.dx = touchEventInfo.dx;
-					touch.dy = touchEventInfo.dy;
-					touch.pressure = touchEventInfo.pressure;
+					if (touch != null)
+					{
+						touch.x = touchEventInfo.x;
+						touch.y = touchEventInfo.y;
+						touch.dx = touchEventInfo.dx;
+						touch.dy = touchEventInfo.dy;
+						touch.pressure = touchEventInfo.pressure;
 
-					Touch.onMove.dispatch(touch);
-				}
+						Touch.onMove.dispatch(touch);
+					}
 
-			default:
+				default:
+			}
+		}
+		catch(e:Exception){
+			handleException(e);
 		}
 	}
 
 	private function handleWindowEvent():Void
 	{
-		FrameTimer.StartTiming();
+		try{
+			FrameTimer.StartTiming();
 
-		var window = parent.__windowByID.get(windowEventInfo.windowID);
+			var window = parent.__windowByID.get(windowEventInfo.windowID);
 
-		if (window != null)
-		{
-			switch (windowEventInfo.type)
+			if (window != null)
 			{
-				case WINDOW_ACTIVATE:
-					advanceTimer();
-					window.onActivate.dispatch();
-					AudioManager.resume();
+				switch (windowEventInfo.type)
+				{
+					case WINDOW_ACTIVATE:
+						advanceTimer();
+						window.onActivate.dispatch();
+						AudioManager.resume();
 
-				case WINDOW_CLOSE:
-					window.close();
+					case WINDOW_CLOSE:
+						window.close();
 
-				case WINDOW_DEACTIVATE:
-					window.onDeactivate.dispatch();
-					AudioManager.suspend();
-					pauseTimer = System.getTimer();
+					case WINDOW_DEACTIVATE:
+						window.onDeactivate.dispatch();
+						AudioManager.suspend();
+						pauseTimer = System.getTimer();
 
-				case WINDOW_ENTER:
-					window.onEnter.dispatch();
+					case WINDOW_ENTER:
+						window.onEnter.dispatch();
 
-				case WINDOW_EXPOSE:
-					window.onExpose.dispatch();
+					case WINDOW_EXPOSE:
+						window.onExpose.dispatch();
 
-				case WINDOW_FOCUS_IN:
-					window.onFocusIn.dispatch();
+					case WINDOW_FOCUS_IN:
+						window.onFocusIn.dispatch();
 
-				case WINDOW_FOCUS_OUT:
-					window.onFocusOut.dispatch();
+					case WINDOW_FOCUS_OUT:
+						window.onFocusOut.dispatch();
 
-				case WINDOW_LEAVE:
-					window.onLeave.dispatch();
+					case WINDOW_LEAVE:
+						window.onLeave.dispatch();
 
-				case WINDOW_MAXIMIZE:
-					window.__maximized = true;
-					window.__fullscreen = false;
-					window.__minimized = false;
-					window.onMaximize.dispatch();
+					case WINDOW_MAXIMIZE:
+						window.__maximized = true;
+						window.__fullscreen = false;
+						window.__minimized = false;
+						window.onMaximize.dispatch();
 
-				case WINDOW_MINIMIZE:
-					window.__minimized = true;
-					window.__maximized = false;
-					window.__fullscreen = false;
-					window.onMinimize.dispatch();
+					case WINDOW_MINIMIZE:
+						window.__minimized = true;
+						window.__maximized = false;
+						window.__fullscreen = false;
+						window.onMinimize.dispatch();
 
-				case WINDOW_MOVE:
-					window.__x = windowEventInfo.x;
-					window.__y = windowEventInfo.y;
-					window.onMove.dispatch(windowEventInfo.x, windowEventInfo.y);
+					case WINDOW_MOVE:
+						window.__x = windowEventInfo.x;
+						window.__y = windowEventInfo.y;
+						window.onMove.dispatch(windowEventInfo.x, windowEventInfo.y);
 
-				case WINDOW_RESIZE:
-					window.__width = windowEventInfo.width;
-					window.__height = windowEventInfo.height;
-					window.onResize.dispatch(windowEventInfo.width, windowEventInfo.height);
+					case WINDOW_RESIZE:
+						window.__width = windowEventInfo.width;
+						window.__height = windowEventInfo.height;
+						window.onResize.dispatch(windowEventInfo.width, windowEventInfo.height);
 
-				case WINDOW_RESTORE:
-					window.__fullscreen = false;
-					window.__minimized = false;
-					window.onRestore.dispatch();
+					case WINDOW_RESTORE:
+						window.__fullscreen = false;
+						window.__minimized = false;
+						window.onRestore.dispatch();
 
-				case WINDOW_SHOW:
-					window.onShow.dispatch();
+					case WINDOW_SHOW:
+						window.onShow.dispatch();
 
-				case WINDOW_HIDE:
-					window.onHide.dispatch();
+					case WINDOW_HIDE:
+						window.onHide.dispatch();
+				}
 			}
-		}
 
-		FrameTimer.EndTiming();
+			FrameTimer.EndTiming();
+		}
+		catch(e:Exception){
+			handleException(e);
+		}
 	}
 
 	private function updateTimer():Void
