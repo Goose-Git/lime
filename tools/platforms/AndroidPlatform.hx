@@ -111,22 +111,65 @@ class AndroidPlatform extends PlatformTarget
 
 		// ---------------------
 		// Added 2025
-		// To ONLY build a specific Architecture use these (to speed things up)
 		// GOOSE
 		// GREGDENNESS
 		//
-		// lime test android -debug -no_arm7
+		// Allow aab bundle builds for final release to google play store by using:
+		// lime test android -bundle
 		//
-		// This is what you would want to test on modern phones with (dont usally need arm7)
-		if ( project.targetFlags.exists("no_arm7") || project.targetFlags.exists("quick")|| project.targetFlags.exists("fast"))
-			project.architectures.remove(Architecture.ARMV7);
+		trace("==============================================================" );
+		trace("Building for Android, options are:" );
+		trace("" );
+		trace("lime test android -debug -quick	: arm64 only, fast test builds" );
+		trace("lime test android -debug -no_arm64	: arm7 only, testing on arm7 devices" );
+		trace("lime test android -debug -simulator	: for testing on simulator" );
+		trace("lime test android -release		: APK for Amazon submission" );
+		trace("lime test android -bundle		: AAB for Google Play submission" );
+		trace("" );
+		trace("==============================================================" );
 
-		if ( project.targetFlags.exists("no_arm64"))
-			project.architectures.remove(Architecture.ARM64);
+		if (project.targetFlags.exists("bundle")) 
+		{
+			trace("Building bundle release (AAB file)");
+
+			// Make sure other flags are not on
+			if (project.targetFlags.exists("debug")) 
+				Log.error("You cannot build a debug version of a aab bundle file");
+
+			if (project.targetFlags.exists("simulator") || project.targetFlags.exists("emulator")) 
+				Log.error("You cannot build a bundle file for simulator");
+			
+			// 1) Force release build graph
+			project.debug = false;                // turn off debug symbols/defines in Lime          
+			this.buildType = "release";           // select release HXML
+			project.targetFlags.remove("debug");  // ignore -debug if someone passed it
+
+			// 2) Make Gradle produce an AAB (not APK)
+			project.environment.set("ANDROID_GRADLE_TASK", ":app:bundleRelease");
+
+			if (project.keystore == null) 
+        		Log.error("Bundling requires a release keystore (upload key). Add <certificate .../> to project.xml.");			
+
+			// Use ALL architectures including x86_64 as this can be used for Google play games on PC
+			project.architectures = [Architecture.ARMV7, Architecture.ARM64, Architecture.X64];
+		}
+		else{
+
+			// To ONLY build a specific Architecture use these (to speed things up)
+			//
+			// lime test android -debug -no_arm7
+			//
+			// This is what you would want to test on modern phones with (dont usally need arm7)
+			if ( project.targetFlags.exists("no_arm7") || project.targetFlags.exists("quick")|| project.targetFlags.exists("fast"))
+				project.architectures.remove(Architecture.ARMV7);
+
+			if ( project.targetFlags.exists("no_arm64"))
+				project.architectures.remove(Architecture.ARM64);
+		}
 
 		trace("Building Architectures: " + project.architectures);
-		trace("(options are: -quick | -no_arm7 | -no_arm64 )" );
-		// ---------------------
+
+		// -- end our custom code
 
 		if (command != "display" && command != "clean")
 		{
@@ -345,6 +388,16 @@ class AndroidPlatform extends PlatformTarget
 
 	public override function install():Void
 	{
+		if (project.targetFlags.exists("bundle")){
+			trace("==========================================");
+			trace("==========================================");
+			trace("Android bundle file built!");
+			trace("No install step needed as we built a bundle file, you can now uploade this .aab file to Google Play");
+			trace("==========================================");
+			trace("==========================================");
+			return;
+		}
+
 		var build = "debug";
 
 		if (project.keystore != null)
