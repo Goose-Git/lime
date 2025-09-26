@@ -1,5 +1,6 @@
 package lime.app;
 
+import haxe.Exception;
 import lime.graphics.RenderContext;
 import lime.system.System;
 import lime.ui.Gamepad;
@@ -671,6 +672,11 @@ class Application extends Module
 		return __backend.messageBox(title, message, type, iconType, buttonType);
 		#end
 		return 0;
+	}
+
+	public function handleException(e:Exception):Void
+	{	
+		__backend.handleException(e);
 	}
 }
 

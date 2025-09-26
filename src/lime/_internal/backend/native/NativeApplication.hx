@@ -176,7 +176,7 @@ class NativeApplication
 
 	// GREGDENNESS GOOSE
 	// Added 2025
-	private function handleException(e:Exception):Void
+	public function handleException(e:Exception):Void
 	{
 		// Call the CCrashReporter
 		trace("==== CRASH DETECTED ====");
