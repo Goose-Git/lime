@@ -678,6 +678,18 @@ class Application extends Module
 	{	
 		__backend.handleException(e);
 	}
+
+	public inline function safeCall(func:Void->Void):Void
+	{	
+		try
+		{
+			func();
+		}
+		catch(e:Exception)
+		{
+			handleException(e);
+		}
+	}
 }
 
 #if air
