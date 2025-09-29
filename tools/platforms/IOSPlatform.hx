@@ -90,6 +90,7 @@ class IOSPlatform extends PlatformTarget
 				hidden: false,
 				title: ""
 			};
+			};
 
 		defaults.architectures = [Architecture.ARM64];
 		defaults.window.width = 0;
@@ -108,6 +109,11 @@ class IOSPlatform extends PlatformTarget
 		for (excludeArchitecture in project.excludeArchitectures)
 		{
 			project.architectures.remove(excludeArchitecture);
+		}
+
+		// If targeting the Simulator, force ARM64 builds
+		if (project.targetFlags.exists("simulator")) {
+			project.architectures = [Architecture.ARM64];
 		}
 
 		targetDirectory = Path.combine(project.app.path, project.config.getString("ios.output-directory", "ios"));
@@ -287,7 +293,7 @@ class IOSPlatform extends PlatformTarget
 
 		context.CURRENT_ARCHS = "( " + valid_archs.join(",") + ") ";
 
-		valid_archs.push("x86_64");
+		// valid_archs.push("x86_64");
 
 		context.VALID_ARCHS = valid_archs.join(" ");
 		context.THUMB_SUPPORT = armv6 ? "GCC_THUMB_SUPPORT = NO;" : "";
@@ -487,13 +493,14 @@ class IOSPlatform extends PlatformTarget
 
 	public override function rebuild():Void
 	{
-		var armv6 = (project.architectures.indexOf(Architecture.ARMV6) > -1 && !project.targetFlags.exists("simulator"));
-		var armv7 = (project.architectures.indexOf(Architecture.ARMV7) > -1 && !project.targetFlags.exists("simulator"));
-		var armv7s = (project.architectures.indexOf(Architecture.ARMV7S) > -1 && !project.targetFlags.exists("simulator"));
-		var arm64 = (command == "rebuild"
-			|| (project.architectures.indexOf(Architecture.ARM64) > -1 && !project.targetFlags.exists("simulator")));
-		var i386 = (project.architectures.indexOf(Architecture.X86) > -1 && project.targetFlags.exists("simulator"));
-		var x86_64 = (command == "rebuild" || project.targetFlags.exists("simulator"));
+		var isSim = project.targetFlags.exists("simulator");
+
+		var armv6 = (project.architectures.indexOf(Architecture.ARMV6) > -1 && !isSim);
+		var armv7 = (project.architectures.indexOf(Architecture.ARMV7) > -1 && !isSim);
+		var armv7s = (project.architectures.indexOf(Architecture.ARMV7S) > -1 && !isSim);
+		var arm64 = (command == "rebuild" || (project.architectures.indexOf(Architecture.ARM64) > -1 && !isSim));
+		var i386 = (project.architectures.indexOf(Architecture.X86) > -1 && isSim);
+		var arm64_sim = (project.architectures.indexOf(Architecture.ARM64) > -1 && isSim);
 
 		var arc = (project.targetFlags.exists("arc"));
 
@@ -504,7 +511,7 @@ class IOSPlatform extends PlatformTarget
 		if (armv7s) commands.push(["-Dios", "-DHXCPP_CPP11", "-DHXCPP_ARMV7S"]);
 		if (arm64) commands.push(["-Dios", "-DHXCPP_CPP11", "-DHXCPP_ARM64"]);
 		if (i386) commands.push(["-Dios", "-Dsimulator", "-DHXCPP_M32", "-DHXCPP_CPP11"]);
-		if (x86_64) commands.push(["-Dios", "-Dsimulator", "-DHXCPP_M64", "-DHXCPP_CPP11"]);
+		if (arm64_sim) commands.push(["-Dios", "-Dsimulator", "-DHXCPP_ARM64", "-DHXCPP_CPP11"]);
 
 		if (arc)
 		{
