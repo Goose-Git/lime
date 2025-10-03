@@ -676,7 +676,9 @@ class Application extends Module
 
 	public function handleException(e:Exception):Void
 	{	
+		#if cpp
 		__backend.handleException(e);
+		#end
 	}
 
 	public inline function safeCall(func:Void->Void):Void
