@@ -80,6 +80,8 @@ class Application extends Module
     public var onMouseDownGlobal(default, null) = new Event<Float->Float->Int->Void>();
     public var onMouseUpGlobal(default, null) = new Event<Float->Float->Int->Void>();
 
+	public var onException:Event<Exception->Void> = new Event<Exception->Void>();
+
 	@:noCompletion private var __backend:ApplicationBackend;
 	@:noCompletion private var __preloader:Preloader;
 	@:noCompletion private var __window:Window;
@@ -674,11 +676,15 @@ class Application extends Module
 		return 0;
 	}
 
+	// GREGDENNESS GOOSE
+	// Added 2025
 	public function handleException(e:Exception):Void
-	{	
-		#if cpp
-		__backend.handleException(e);
-		#end
+	{
+		// This would be called by the native backend system when they catch a general exception
+		// Call the CCrashReporter
+		trace("==== CRASH DETECTED ====");
+		trace("==== haxe exception handled: " + e.message);
+		onException.dispatch(e);
 	}
 
 	public inline function safeCall(func:Void->Void):Void

@@ -1,5 +1,6 @@
 package lime._internal.backend.html5;
 
+import haxe.Exception;
 import haxe.Timer;
 import js.html.webgl.RenderingContext;
 import js.html.CanvasElement;
@@ -444,72 +445,92 @@ class HTML5Window
 
 	private function handleContextEvent(event:js.html.Event):Void
 	{
-		switch (event.type)
-		{
-			case "webglcontextlost":
-				if (event.cancelable) event.preventDefault();
+		try{		
+			switch (event.type)
+			{
+				case "webglcontextlost":
+					if (event.cancelable) event.preventDefault();
 
-				// #if !display
-				if (GL.context != null)
-				{
-					// GL.context.__contextLost = true;
-				}
-				// #end
+					// #if !display
+					if (GL.context != null)
+					{
+						// GL.context.__contextLost = true;
+					}
+					// #end
 
-				parent.context = null;
+					parent.context = null;
 
-				parent.onRenderContextLost.dispatch();
+					parent.onRenderContextLost.dispatch();
 
-			case "webglcontextrestored":
-				createContext();
+				case "webglcontextrestored":
+					createContext();
 
-				parent.onRenderContextRestored.dispatch(parent.context);
+					parent.onRenderContextRestored.dispatch(parent.context);
 
-			default:
+				default:
+			}
+		}
+		catch(e:Exception){
+			parent.application.handleException(e);
 		}
 	}
 
 	private function handleContextMenuEvent(event:MouseEvent):Void
 	{
-		if ((parent.onMouseUp.canceled || parent.onMouseDown.canceled) && event.cancelable)
-		{
-			event.preventDefault();
+		try{
+			if ((parent.onMouseUp.canceled || parent.onMouseDown.canceled) && event.cancelable)
+			{
+				event.preventDefault();
+			}
+		}
+		catch(e:Exception){
+			parent.application.handleException(e);
 		}
 	}
 
 	private function handleCutOrCopyEvent(event:ClipboardEvent):Void
 	{
-		var text = Clipboard.text;
-		if (text == null) {
-			text = "";
+		try{
+			var text = Clipboard.text;
+			if (text == null) {
+				text = "";
+			}
+			event.clipboardData.setData("text/plain", text);
+			if (event.cancelable) event.preventDefault();
 		}
-		event.clipboardData.setData("text/plain", text);
-		if (event.cancelable) event.preventDefault();
+		catch(e:Exception){
+			parent.application.handleException(e);
+		}
 	}
 
 	private function handleDragEvent(event:DragEvent):Bool
 	{
-		switch (event.type)
-		{
-			case "dragstart":
-				if (cast(event.target, Element).nodeName.toLowerCase() == "img" && event.cancelable)
-				{
+		try{
+			switch (event.type)
+			{
+				case "dragstart":
+					if (cast(event.target, Element).nodeName.toLowerCase() == "img" && event.cancelable)
+					{
+						event.preventDefault();
+						return false;
+					}
+
+				case "dragover":
 					event.preventDefault();
 					return false;
-				}
 
-			case "dragover":
-				event.preventDefault();
-				return false;
-
-			case "drop":
-				// TODO: Create a formal API that supports HTML5 file objects
-				if (event.dataTransfer != null && event.dataTransfer.files.length > 0)
-				{
-					parent.onDropFile.dispatch(cast event.dataTransfer.files);
-					event.preventDefault();
-					return false;
-				}
+				case "drop":
+					// TODO: Create a formal API that supports HTML5 file objects
+					if (event.dataTransfer != null && event.dataTransfer.files.length > 0)
+					{
+						parent.onDropFile.dispatch(cast event.dataTransfer.files);
+						event.preventDefault();
+						return false;
+					}
+			}
+		}
+		catch(e:Exception){
+			parent.application.handleException(e);
 		}
 
 		return true;
@@ -517,58 +538,68 @@ class HTML5Window
 
 	private function handleFocusEvent(event:FocusEvent):Void
 	{
-		if (textInputEnabled)
-		{
-			if (event.relatedTarget == null || isDescendent(cast event.relatedTarget))
+		try{
+			if (textInputEnabled)
 			{
-				focusTextInput();
+				if (event.relatedTarget == null || isDescendent(cast event.relatedTarget))
+				{
+					focusTextInput();
+				}
 			}
+		}
+		catch(e:Exception){
+			parent.application.handleException(e);
 		}
 	}
 
 	private function handleFullscreenEvent(event:Dynamic):Void
 	{
-		var fullscreenElement = untyped (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement
-			|| document.msFullscreenElement);
+		try{
+			var fullscreenElement = untyped (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement
+				|| document.msFullscreenElement);
 
-		if (fullscreenElement != null)
-		{
-			isFullscreen = true;
-			parent.__fullscreen = true;
-
-			if (requestedFullscreen)
+			if (fullscreenElement != null)
 			{
-				requestedFullscreen = false;
-				parent.onFullscreen.dispatch();
+				isFullscreen = true;
+				parent.__fullscreen = true;
+
+				if (requestedFullscreen)
+				{
+					requestedFullscreen = false;
+					parent.onFullscreen.dispatch();
+				}
+			}
+			else
+			{
+				isFullscreen = false;
+				parent.__fullscreen = false;
+
+				// TODO: Handle a different way?
+				parent.onRestore.dispatch();
+				// parent.onResize.dispatch (parent.__width, parent.__height);
+
+				var changeEvents = [
+					"fullscreenchange",
+					"mozfullscreenchange",
+					"webkitfullscreenchange",
+					"MSFullscreenChange"
+				];
+				var errorEvents = [
+					"fullscreenerror",
+					"mozfullscreenerror",
+					"webkitfullscreenerror",
+					"MSFullscreenError"
+				];
+
+				for (i in 0...changeEvents.length)
+				{
+					Browser.document.removeEventListener(changeEvents[i], handleFullscreenEvent, false);
+					Browser.document.removeEventListener(errorEvents[i], handleFullscreenEvent, false);
+				}
 			}
 		}
-		else
-		{
-			isFullscreen = false;
-			parent.__fullscreen = false;
-
-			// TODO: Handle a different way?
-			parent.onRestore.dispatch();
-			// parent.onResize.dispatch (parent.__width, parent.__height);
-
-			var changeEvents = [
-				"fullscreenchange",
-				"mozfullscreenchange",
-				"webkitfullscreenchange",
-				"MSFullscreenChange"
-			];
-			var errorEvents = [
-				"fullscreenerror",
-				"mozfullscreenerror",
-				"webkitfullscreenerror",
-				"MSFullscreenError"
-			];
-
-			for (i in 0...changeEvents.length)
-			{
-				Browser.document.removeEventListener(changeEvents[i], handleFullscreenEvent, false);
-				Browser.document.removeEventListener(errorEvents[i], handleFullscreenEvent, false);
-			}
+		catch(e:Exception){
+			parent.application.handleException(e);
 		}
 	}
 
@@ -594,23 +625,28 @@ class HTML5Window
 
 	private function handleInputEvent(event:InputEvent):Void
 	{
-		if (imeCompositionActive)
-		{
-			return;
-		}
-
-		// In order to ensure that the browser will fire clipboard events, we always need to have something selected.
-		// Therefore, `value` cannot be "".
-		if (textInput.value != dummyCharacter)
-		{
-			var value = StringTools.replace(textInput.value, dummyCharacter, "");
-
-			if (value.length > 0)
+		try{
+			if (imeCompositionActive)
 			{
-				parent.onTextInput.dispatch(value);
+				return;
 			}
 
-			textInput.value = dummyCharacter;
+			// In order to ensure that the browser will fire clipboard events, we always need to have something selected.
+			// Therefore, `value` cannot be "".
+			if (textInput.value != dummyCharacter)
+			{
+				var value = StringTools.replace(textInput.value, dummyCharacter, "");
+
+				if (value.length > 0)
+				{
+					parent.onTextInput.dispatch(value);
+				}
+
+				textInput.value = dummyCharacter;
+			}
+		}
+		catch(e:Exception){
+			parent.application.handleException(e);
 		}
 	}
 
@@ -619,296 +655,317 @@ class HTML5Window
 		var x = 0.0;
 		var y = 0.0;
 
-		if (event.type != "wheel")
-		{
-			if (parent.element != null)
+		try{
+
+			if (event.type != "wheel")
 			{
-				if (canvas != null)
+				if (parent.element != null)
 				{
-					var rect = canvas.getBoundingClientRect();
-					x = (event.clientX - rect.left) * (parent.__width / rect.width);
-					y = (event.clientY - rect.top) * (parent.__height / rect.height);
-				}
-				else if (div != null)
-				{
-					var rect = div.getBoundingClientRect();
-					// x = (event.clientX - rect.left) * (window.__backend.div.style.width / rect.width);
-					x = (event.clientX - rect.left);
-					// y = (event.clientY - rect.top) * (window.__backend.div.style.height / rect.height);
-					y = (event.clientY - rect.top);
+					if (canvas != null)
+					{
+						var rect = canvas.getBoundingClientRect();
+						x = (event.clientX - rect.left) * (parent.__width / rect.width);
+						y = (event.clientY - rect.top) * (parent.__height / rect.height);
+					}
+					else if (div != null)
+					{
+						var rect = div.getBoundingClientRect();
+						// x = (event.clientX - rect.left) * (window.__backend.div.style.width / rect.width);
+						x = (event.clientX - rect.left);
+						// y = (event.clientY - rect.top) * (window.__backend.div.style.height / rect.height);
+						y = (event.clientY - rect.top);
+					}
+					else
+					{
+						var rect = parent.element.getBoundingClientRect();
+						x = (event.clientX - rect.left) * (parent.__width / rect.width);
+						y = (event.clientY - rect.top) * (parent.__height / rect.height);
+					}
 				}
 				else
 				{
-					var rect = parent.element.getBoundingClientRect();
-					x = (event.clientX - rect.left) * (parent.__width / rect.width);
-					y = (event.clientY - rect.top) * (parent.__height / rect.height);
+					x = event.clientX;
+					y = event.clientY;
 				}
+
+				switch (event.type)
+				{
+					case "mousedown":
+						if (event.currentTarget == parent.element)
+						{
+							// Release outside browser window
+							Browser.window.addEventListener("mouseup", handleMouseEvent);
+						}
+
+						parent.clickCount = event.detail;
+						parent.onMouseDown.dispatch(x, y, event.button);
+						parent.clickCount = 0;
+
+						if (parent.onMouseDown.canceled && event.cancelable)
+						{
+							event.preventDefault();
+						}
+
+					case "mouseenter":
+						if (event.target == parent.element)
+						{
+							parent.onEnter.dispatch();
+
+							if (parent.onEnter.canceled && event.cancelable)
+							{
+								event.preventDefault();
+							}
+						}
+
+					case "mouseleave":
+						if (event.target == parent.element)
+						{
+							parent.onLeave.dispatch();
+
+							if (parent.onLeave.canceled && event.cancelable)
+							{
+								event.preventDefault();
+							}
+						}
+
+					case "mouseup":
+						Browser.window.removeEventListener("mouseup", handleMouseEvent);
+
+						if (event.currentTarget == parent.element)
+						{
+							event.stopPropagation();
+						}
+
+						parent.clickCount = event.detail;
+						parent.onMouseUp.dispatch(x, y, event.button);
+						parent.clickCount = 0;
+
+						if (parent.onMouseUp.canceled && event.cancelable)
+						{
+							event.preventDefault();
+						}
+
+					case "mousemove":
+						if (x != cacheMouseX || y != cacheMouseY)
+						{
+							parent.onMouseMove.dispatch(x, y);
+							parent.onMouseMoveRelative.dispatch(x - cacheMouseX, y - cacheMouseY);
+
+							if ((parent.onMouseMove.canceled || parent.onMouseMoveRelative.canceled) && event.cancelable)
+							{
+								event.preventDefault();
+							}
+						}
+
+					default:
+				}
+
+				cacheMouseX = x;
+				cacheMouseY = y;
 			}
 			else
 			{
-				x = event.clientX;
-				y = event.clientY;
+				var deltaMode:MouseWheelMode = switch (untyped event.deltaMode)
+				{
+					case 0: PIXELS;
+					case 1: LINES;
+					case 2: PAGES;
+					default: UNKNOWN;
+				}
+
+				parent.onMouseWheel.dispatch(untyped event.deltaX, -untyped event.deltaY, deltaMode);
+
+				if (parent.onMouseWheel.canceled && event.cancelable)
+				{
+					event.preventDefault();
+				}
 			}
-
-			switch (event.type)
-			{
-				case "mousedown":
-					if (event.currentTarget == parent.element)
-					{
-						// Release outside browser window
-						Browser.window.addEventListener("mouseup", handleMouseEvent);
-					}
-
-					parent.clickCount = event.detail;
-					parent.onMouseDown.dispatch(x, y, event.button);
-					parent.clickCount = 0;
-
-					if (parent.onMouseDown.canceled && event.cancelable)
-					{
-						event.preventDefault();
-					}
-
-				case "mouseenter":
-					if (event.target == parent.element)
-					{
-						parent.onEnter.dispatch();
-
-						if (parent.onEnter.canceled && event.cancelable)
-						{
-							event.preventDefault();
-						}
-					}
-
-				case "mouseleave":
-					if (event.target == parent.element)
-					{
-						parent.onLeave.dispatch();
-
-						if (parent.onLeave.canceled && event.cancelable)
-						{
-							event.preventDefault();
-						}
-					}
-
-				case "mouseup":
-					Browser.window.removeEventListener("mouseup", handleMouseEvent);
-
-					if (event.currentTarget == parent.element)
-					{
-						event.stopPropagation();
-					}
-
-					parent.clickCount = event.detail;
-					parent.onMouseUp.dispatch(x, y, event.button);
-					parent.clickCount = 0;
-
-					if (parent.onMouseUp.canceled && event.cancelable)
-					{
-						event.preventDefault();
-					}
-
-				case "mousemove":
-					if (x != cacheMouseX || y != cacheMouseY)
-					{
-						parent.onMouseMove.dispatch(x, y);
-						parent.onMouseMoveRelative.dispatch(x - cacheMouseX, y - cacheMouseY);
-
-						if ((parent.onMouseMove.canceled || parent.onMouseMoveRelative.canceled) && event.cancelable)
-						{
-							event.preventDefault();
-						}
-					}
-
-				default:
-			}
-
-			cacheMouseX = x;
-			cacheMouseY = y;
 		}
-		else
-		{
-			var deltaMode:MouseWheelMode = switch (untyped event.deltaMode)
-			{
-				case 0: PIXELS;
-				case 1: LINES;
-				case 2: PAGES;
-				default: UNKNOWN;
-			}
-
-			parent.onMouseWheel.dispatch(untyped event.deltaX, -untyped event.deltaY, deltaMode);
-
-			if (parent.onMouseWheel.canceled && event.cancelable)
-			{
-				event.preventDefault();
-			}
+		catch(e:Exception){
+			parent.application.handleException(e);
 		}
 	}
 
 	private function handlePasteEvent(event:ClipboardEvent):Void
 	{
-		if (untyped event.clipboardData.types.indexOf("text/plain") > -1)
-		{
-			var text = event.clipboardData.getData("text/plain");
-			Clipboard.text = text;
-
-			if (textInputEnabled)
+		try{
+			if (untyped event.clipboardData.types.indexOf("text/plain") > -1)
 			{
-				parent.onTextInput.dispatch(text);
-			}
+				var text = event.clipboardData.getData("text/plain");
+				Clipboard.text = text;
 
-			if (event.cancelable) event.preventDefault();
+				if (textInputEnabled)
+				{
+					parent.onTextInput.dispatch(text);
+				}
+
+				if (event.cancelable) event.preventDefault();
+			}
+		}
+		catch(e:Exception){
+			parent.application.handleException(e);
 		}
 	}
 
 	private function handleResizeEvent(event:js.html.Event):Void
 	{
-		primaryTouch = null;
-		updateSize();
+		try{
+			primaryTouch = null;
+			updateSize();
+		}
+		catch(e:Exception){
+			parent.application.handleException(e);
+		}
 	}
 
 	private function handleTouchEvent(event:TouchEvent):Void
 	{
-		if (event.cancelable) event.preventDefault();
+		try{
+			if (event.cancelable) event.preventDefault();
 
-		var rect = null;
+			var rect = null;
 
-		if (parent.element != null)
-		{
-			if (canvas != null)
+			if (parent.element != null)
 			{
-				rect = canvas.getBoundingClientRect();
-			}
-			else if (div != null)
-			{
-				rect = div.getBoundingClientRect();
-			}
-			else
-			{
-				rect = parent.element.getBoundingClientRect();
-			}
-		}
-
-		var windowWidth:Float = setWidth;
-		var windowHeight:Float = setHeight;
-
-		if (windowWidth == 0 || windowHeight == 0)
-		{
-			if (rect != null)
-			{
-				windowWidth = rect.width;
-				windowHeight = rect.height;
-			}
-			else
-			{
-				windowWidth = 1;
-				windowHeight = 1;
-			}
-		}
-
-		var touch, x, y, cacheX, cacheY;
-
-		for (data in event.changedTouches)
-		{
-			x = 0.0;
-			y = 0.0;
-
-			if (rect != null)
-			{
-				x = (data.clientX - rect.left) * (windowWidth / rect.width);
-				y = (data.clientY - rect.top) * (windowHeight / rect.height);
-			}
-			else
-			{
-				x = data.clientX;
-				y = data.clientY;
-			}
-
-			if (event.type == "touchstart")
-			{
-				touch = unusedTouchesPool.pop();
-
-				if (touch == null)
+				if (canvas != null)
 				{
-					touch = new Touch(x / windowWidth, y / windowHeight, data.identifier, 0, 0, data.force, parent.id);
+					rect = canvas.getBoundingClientRect();
+				}
+				else if (div != null)
+				{
+					rect = div.getBoundingClientRect();
 				}
 				else
 				{
-					touch.x = x / windowWidth;
-					touch.y = y / windowHeight;
-					touch.id = data.identifier;
-					touch.dx = 0;
-					touch.dy = 0;
-					touch.pressure = data.force;
-					touch.device = parent.id;
-				}
-
-				currentTouches.set(data.identifier, touch);
-
-				Touch.onStart.dispatch(touch);
-
-				if (primaryTouch == null)
-				{
-					primaryTouch = touch;
-				}
-
-				if (touch == primaryTouch)
-				{
-					parent.onMouseDown.dispatch(x, y, 0);
+					rect = parent.element.getBoundingClientRect();
 				}
 			}
-			else
+
+			var windowWidth:Float = setWidth;
+			var windowHeight:Float = setHeight;
+
+			if (windowWidth == 0 || windowHeight == 0)
 			{
-				touch = currentTouches.get(data.identifier);
-
-				if (touch != null)
+				if (rect != null)
 				{
-					cacheX = touch.x;
-					cacheY = touch.y;
+					windowWidth = rect.width;
+					windowHeight = rect.height;
+				}
+				else
+				{
+					windowWidth = 1;
+					windowHeight = 1;
+				}
+			}
 
-					touch.x = x / windowWidth;
-					touch.y = y / windowHeight;
-					touch.dx = touch.x - cacheX;
-					touch.dy = touch.y - cacheY;
-					touch.pressure = data.force;
+			var touch, x, y, cacheX, cacheY;
 
-					switch (event.type)
+			for (data in event.changedTouches)
+			{
+				x = 0.0;
+				y = 0.0;
+
+				if (rect != null)
+				{
+					x = (data.clientX - rect.left) * (windowWidth / rect.width);
+					y = (data.clientY - rect.top) * (windowHeight / rect.height);
+				}
+				else
+				{
+					x = data.clientX;
+					y = data.clientY;
+				}
+
+				if (event.type == "touchstart")
+				{
+					touch = unusedTouchesPool.pop();
+
+					if (touch == null)
 					{
-						case "touchmove":
-							Touch.onMove.dispatch(touch);
+						touch = new Touch(x / windowWidth, y / windowHeight, data.identifier, 0, 0, data.force, parent.id);
+					}
+					else
+					{
+						touch.x = x / windowWidth;
+						touch.y = y / windowHeight;
+						touch.id = data.identifier;
+						touch.dx = 0;
+						touch.dy = 0;
+						touch.pressure = data.force;
+						touch.device = parent.id;
+					}
 
-							if (touch == primaryTouch)
-							{
-								parent.onMouseMove.dispatch(x, y);
-							}
+					currentTouches.set(data.identifier, touch);
 
-						case "touchend":
-							Touch.onEnd.dispatch(touch);
+					Touch.onStart.dispatch(touch);
 
-							currentTouches.remove(data.identifier);
-							unusedTouchesPool.add(touch);
+					if (primaryTouch == null)
+					{
+						primaryTouch = touch;
+					}
 
-							if (touch == primaryTouch)
-							{
-								parent.onMouseUp.dispatch(x, y, 0);
-								primaryTouch = null;
-							}
+					if (touch == primaryTouch)
+					{
+						parent.onMouseDown.dispatch(x, y, 0);
+					}
+				}
+				else
+				{
+					touch = currentTouches.get(data.identifier);
 
-						case "touchcancel":
-							Touch.onCancel.dispatch(touch);
+					if (touch != null)
+					{
+						cacheX = touch.x;
+						cacheY = touch.y;
 
-							currentTouches.remove(data.identifier);
-							unusedTouchesPool.add(touch);
+						touch.x = x / windowWidth;
+						touch.y = y / windowHeight;
+						touch.dx = touch.x - cacheX;
+						touch.dy = touch.y - cacheY;
+						touch.pressure = data.force;
 
-							if (touch == primaryTouch)
-							{
-								// parent.onMouseUp.dispatch (x, y, 0);
-								primaryTouch = null;
-							}
+						switch (event.type)
+						{
+							case "touchmove":
+								Touch.onMove.dispatch(touch);
 
-						default:
+								if (touch == primaryTouch)
+								{
+									parent.onMouseMove.dispatch(x, y);
+								}
+
+							case "touchend":
+								Touch.onEnd.dispatch(touch);
+
+								currentTouches.remove(data.identifier);
+								unusedTouchesPool.add(touch);
+
+								if (touch == primaryTouch)
+								{
+									parent.onMouseUp.dispatch(x, y, 0);
+									primaryTouch = null;
+								}
+
+							case "touchcancel":
+								Touch.onCancel.dispatch(touch);
+
+								currentTouches.remove(data.identifier);
+								unusedTouchesPool.add(touch);
+
+								if (touch == primaryTouch)
+								{
+									// parent.onMouseUp.dispatch (x, y, 0);
+									primaryTouch = null;
+								}
+
+							default:
+						}
 					}
 				}
 			}
+		}
+		catch(e:Exception){
+			parent.application.handleException(e);
 		}
 	}
 

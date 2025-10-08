@@ -14,6 +14,7 @@ import lime.ui.Gamepad;
 import lime.ui.GamepadButton;
 import lime.ui.Joystick;
 import lime.ui.Window;
+import haxe.Exception;
 
 @:access(lime._internal.backend.html5.HTML5Window)
 @:access(lime.app.Application)
@@ -354,44 +355,51 @@ class HTML5Application
 	{
 		// TODO: Support independent window frame rates
 
-		for (window in parent.__windows)
-		{
-			window.__backend.updateSize();
-		}
-
-		updateGameDevices();
-
-		currentUpdate = Browser.window.performance.now();
-
-		if (currentUpdate >= nextUpdate)
-		{
-			#if stats
-			stats.begin();
-			#end
-
-			deltaTime = currentUpdate - lastUpdate;
+		try{
 
 			for (window in parent.__windows)
 			{
-				parent.onUpdate.dispatch(Std.int(deltaTime));
-				if (window.context != null) window.onRender.dispatch(window.context);
+				window.__backend.updateSize();
 			}
 
-			#if stats
-			stats.end();
-			#end
+			updateGameDevices();
 
-			if (framePeriod < 0)
+			currentUpdate = Browser.window.performance.now();
+
+			if (currentUpdate >= nextUpdate)
 			{
-				nextUpdate = currentUpdate;
-			}
-			else
-			{
-				nextUpdate = currentUpdate - (currentUpdate % framePeriod) + framePeriod;
-			}
+				#if stats
+				stats.begin();
+				#end
 
-			lastUpdate = currentUpdate;
+				deltaTime = currentUpdate - lastUpdate;
+
+				for (window in parent.__windows)
+				{
+					parent.onUpdate.dispatch(Std.int(deltaTime));
+					if (window.context != null) window.onRender.dispatch(window.context);
+				}
+
+				#if stats
+				stats.end();
+				#end
+
+				if (framePeriod < 0)
+				{
+					nextUpdate = currentUpdate;
+				}
+				else
+				{
+					nextUpdate = currentUpdate - (currentUpdate % framePeriod) + framePeriod;
+				}
+
+				lastUpdate = currentUpdate;
+			}
 		}
+		catch(e:Exception){
+			parent.handleException(e);
+		}
+	
 
 		Browser.window.requestAnimationFrame(cast handleApplicationEvent);
 	}

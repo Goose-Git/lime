@@ -70,8 +70,6 @@ class NativeApplication
 	private var parent:Application;
 	private var toggleFullscreen:Bool;
 
-	public var onException:Event<Exception->Void> = new Event<Exception->Void>();
-
 	private static function __init__()
 	{
 		#if (lime_cffi && !macro)
@@ -174,16 +172,6 @@ class NativeApplication
 		#end
 	}
 
-	// GREGDENNESS GOOSE
-	// Added 2025
-	public function handleException(e:Exception):Void
-	{
-		// Call the CCrashReporter
-		trace("==== CRASH DETECTED ====");
-		trace("==== haxe exception handled: " + e.message);
-		onException.dispatch(e);
-	}
-
 	private function handleApplicationEvent():Void
 	{
 		try{
@@ -202,7 +190,7 @@ class NativeApplication
 			FrameTimer.EndTiming();
 		}
 		catch(e:Exception){
-			handleException(e);
+			parent.handleException(e);
 		}
 	}
 
@@ -362,7 +350,7 @@ class NativeApplication
 			}
 		}
 		catch(e:Exception){
-			handleException(e);
+			parent.handleException(e);
 		}
 	}
 
@@ -432,7 +420,7 @@ class NativeApplication
 			FrameTimer.EndTiming();
 		}
 		catch(e:Exception){
-			handleException(e);
+			parent.handleException(e);
 		}
 	}
 
@@ -499,7 +487,7 @@ class NativeApplication
 			FrameTimer.EndTiming();
 		}
 		catch(e:Exception){
-			handleException(e);
+			parent.handleException(e);
 		}
 	}
 
@@ -514,7 +502,7 @@ class NativeApplication
 			}
 		}
 		catch(e:Exception){
-			handleException(e);
+			parent.handleException(e);
 		}
 	}
 
@@ -539,7 +527,7 @@ class NativeApplication
 			}
 		}
 		catch(e:Exception){
-			handleException(e);
+			parent.handleException(e);
 		}
 	}
 
@@ -606,7 +594,7 @@ class NativeApplication
 			}
 		}
 		catch(e:Exception){
-			handleException(e);
+			parent.handleException(e);
 		}
 	}
 
@@ -687,7 +675,7 @@ class NativeApplication
 			FrameTimer.EndTiming();
 		}
 		catch(e:Exception){
-			handleException(e);
+			parent.handleException(e);
 		}
 	}
 
