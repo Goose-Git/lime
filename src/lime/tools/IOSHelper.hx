@@ -345,7 +345,17 @@ class IOSHelper
 			waitForDeviceState("xcrun", ["simctl", "install", currentDeviceID, applicationPath]);
 			waitForDeviceState("xcrun", ["simctl", "launch", currentDeviceID, project.meta.packageName]);
 
-			System.runCommand("", "tail", ["-F", "$HOME/Library/Logs/CoreSimulator/" + currentDeviceID + "/system.log"]);
+
+			Log.println( "");
+			Log.println("\x1b[1;31m=================================================\x1b[0m");
+			Log.println("=================================================");
+			Log.println("To get console output from simulator run this command:");
+			Log.println("\x1b[1;32mxcrun simctl launch --console-pty --terminate-running-process " + currentDeviceID + " " + project.meta.packageName+ "\x1b[0m");
+			Log.println("=================================================");
+			Log.println("\x1b[1;31m=================================================\x1b[0m");
+			
+
+			//System.runCommand("", "tail", ["-F", "$HOME/Library/Logs/CoreSimulator/" + currentDeviceID + "/system.log"]);
 		}
 		else
 		{
