@@ -174,7 +174,9 @@ class NativeApplication
 
 	private function handleApplicationEvent():Void
 	{
+		#if !debug
 		try{
+		#end
 			FrameTimer.StartTiming();
 
 			switch (applicationEventInfo.type)
@@ -188,10 +190,13 @@ class NativeApplication
 			}
 
 			FrameTimer.EndTiming();
+		
+		#if !debug
 		}
 		catch(e:Exception){
 			parent.handleException(e);
 		}
+		#end
 	}
 
 	private function handleClipboardEvent():Void
@@ -268,7 +273,9 @@ class NativeApplication
 
 	private function handleKeyEvent():Void
 	{
+		#if !debug
 		try{
+		#end
 			var window = parent.__windowByID.get(keyEventInfo.windowID);
 
 			if (window != null)
@@ -348,15 +355,19 @@ class NativeApplication
 				}
 				#end
 			}
+		#if !debug
 		}
 		catch(e:Exception){
 			parent.handleException(e);
 		}
+		#end
 	}
 
 	private function handleMouseEvent():Void
 	{
+		#if !debug
 		try{
+		#end
 			FrameTimer.StartTiming();
 
 			// ----------------------
@@ -418,15 +429,19 @@ class NativeApplication
 				}
 			}
 			FrameTimer.EndTiming();
+		#if !debug
 		}
 		catch(e:Exception){
 			parent.handleException(e);
 		}
+		#end
 	}
 
 	private function handleRenderEvent():Void
 	{
+		#if !debug
 		try{
+		#end
 			// TODO: Allow windows to render independently
 			FrameTimer.StartTiming();
 
@@ -485,30 +500,40 @@ class NativeApplication
 			}
 
 			FrameTimer.EndTiming();
+
+		#if !debug
 		}
 		catch(e:Exception){
 			parent.handleException(e);
 		}
+		#end
 	}
 
 	private function handleSensorEvent():Void
 	{
+		#if !debug
 		try{
+		#end
 			var sensor = Sensor.sensorByID.get(sensorEventInfo.id);
 
 			if (sensor != null)
 			{
 				sensor.onUpdate.dispatch(sensorEventInfo.x, sensorEventInfo.y, sensorEventInfo.z);
 			}
+		
+		#if !debug
 		}
 		catch(e:Exception){
 			parent.handleException(e);
 		}
+		#end
 	}
 
 	private function handleTextEvent():Void
 	{
+		#if !debug
 		try{
+		#end
 			var window = parent.__windowByID.get(textEventInfo.windowID);
 
 			if (window != null)
@@ -525,15 +550,20 @@ class NativeApplication
 					default:
 				}
 			}
+
+		#if !debug
 		}
 		catch(e:Exception){
 			parent.handleException(e);
 		}
+		#end
 	}
 
 	private function handleTouchEvent():Void
 	{
+		#if !debug
 		try{
+		#end
 			switch (touchEventInfo.type)
 			{
 				case TOUCH_START:
@@ -592,15 +622,20 @@ class NativeApplication
 
 				default:
 			}
+		
+		#if !debug
 		}
 		catch(e:Exception){
 			parent.handleException(e);
 		}
+		#end
 	}
 
 	private function handleWindowEvent():Void
 	{
+		#if !debug
 		try{
+		#end
 			FrameTimer.StartTiming();
 
 			var window = parent.__windowByID.get(windowEventInfo.windowID);
@@ -673,10 +708,13 @@ class NativeApplication
 			}
 
 			FrameTimer.EndTiming();
+		
+		#if !debug
 		}
 		catch(e:Exception){
 			parent.handleException(e);
 		}
+		#end
 	}
 
 	private function updateTimer():Void
