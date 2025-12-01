@@ -123,7 +123,7 @@ class AndroidPlatform extends PlatformTarget
 		trace("lime test android -debug -quick			: arm64 only, fast test builds" );
 		trace("lime test android -debug -no_arm64		: arm7 only, testing on arm7 devices" );
 		trace("lime test android -debug -simulator		: for testing on simulator" );
-		trace("lime test android -release -amazon		: APK for Amazon submission" );
+		trace("lime test android -release -amazon -Damazon		: APK for Amazon submission" );
 		trace("lime test android -bundle				: AAB for Google Play submission" );
 		trace("" );
 		trace("==============================================================" );

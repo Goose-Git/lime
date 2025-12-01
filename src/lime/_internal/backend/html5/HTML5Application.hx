@@ -355,8 +355,9 @@ class HTML5Application
 	{
 		// TODO: Support independent window frame rates
 
+		#if !debug
 		try{
-
+		#end
 			for (window in parent.__windows)
 			{
 				window.__backend.updateSize();
@@ -395,11 +396,13 @@ class HTML5Application
 
 				lastUpdate = currentUpdate;
 			}
+
+	#if !debug
 		}
 		catch(e:Exception){
 			parent.handleException(e);
 		}
-	
+	#end
 
 		Browser.window.requestAnimationFrame(cast handleApplicationEvent);
 	}
