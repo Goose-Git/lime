@@ -3989,20 +3989,24 @@ namespace lime {
 
 	}
 
-
+	// ---
+	// We added these for images and clipboard
 	void lime_get_clipboard_image_pixels (value image) {
-
 		Image _image = Image (image);
 		Clipboard::GetImagePixels( &_image);
-
 	}
-
-
 	HL_PRIM void HL_NAME(hl_get_clipboard_image_pixels)(Image* image) {	
-
 		Clipboard::GetImagePixels(image);
-
 	}
+
+	void lime_set_clipboard_image_pixels (value image) {
+		Image _image = Image (image);
+		Clipboard::SetImagePixels( &_image);
+	}
+	HL_PRIM void HL_NAME(hl_set_clipboard_image_pixels)(Image* image) {	
+		Clipboard::SetImagePixels(image);
+	}
+	// ---
 
 	int lime_window_get_border_thickness (value window) {
 
@@ -4362,6 +4366,7 @@ namespace lime {
 	DEFINE_PRIME0 (lime_get_global_mouse_y);
 	DEFINE_PRIME1v (lime_get_clipboard_image_size);
 	DEFINE_PRIME1v (lime_get_clipboard_image_pixels);
+	DEFINE_PRIME1v (lime_set_clipboard_image_pixels);
 	DEFINE_PRIME1 (lime_window_get_border_thickness);   
 	DEFINE_PRIME1 (lime_window_get_titlebar_height);    
 	DEFINE_PRIME2v (lime_window_hide);
@@ -4560,6 +4565,7 @@ namespace lime {
 	DEFINE_HL_PRIM (_I32, hl_get_global_mouse_y, _NO_ARG);
 	DEFINE_HL_PRIM( _VOID, hl_get_clipboard_image_size, _TRECTANGLE );
 	DEFINE_HL_PRIM( _VOID, hl_get_clipboard_image_pixels, _TIMAGE );
+	DEFINE_HL_PRIM( _VOID, hl_set_clipboard_image_pixels, _TIMAGE );
 	DEFINE_HL_PRIM (_I32, hl_window_get_border_thickness, _TCFFIPOINTER);         
 	DEFINE_HL_PRIM (_I32, hl_window_get_titlebar_height, _TCFFIPOINTER); 
 	DEFINE_HL_PRIM (_VOID, hl_window_hide, _TCFFIPOINTER _BOOL);

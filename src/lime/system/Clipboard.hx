@@ -146,4 +146,12 @@ class Clipboard
 	#end
 		return null;
 	}
+
+	public static function setImage(image:Image){
+	#if (!macro && lime_cffi)
+	#if hl
+		NativeCFFI.lime_set_clipboard_image_pixels(image);
+	#end
+	#end
+	}
 }

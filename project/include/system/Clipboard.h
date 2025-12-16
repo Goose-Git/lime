@@ -16,6 +16,7 @@ namespace lime {
 			static bool SetText (const char* text);
 			static void GetImageSize(Rectangle* size);
 			static void GetImagePixels(Image* dstImage);
+			static void SetImagePixels (Image* srcImage);
 
 	};
 

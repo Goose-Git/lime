@@ -112,7 +112,6 @@ namespace lime {
 	#endif
 	}
 
-
 	void Clipboard::GetImagePixels(Image* dstImage){
 	
 		//
@@ -203,6 +202,92 @@ namespace lime {
 			delete [] flippedRGBBuffer;
 			GlobalUnlock(hGMem);
 			CloseClipboard();
+		}
+
+	#endif
+	}
+
+	void Clipboard::SetImagePixels (Image* srcImage) {
+
+	#if defined (HX_WINDOWS)
+
+		if (!srcImage || !srcImage->buffer) return;
+
+		int width  = srcImage->width;
+		int height = srcImage->height;
+
+		// --- DIB parameters ---
+		const int bytesPerPixel = 3; // BGR
+		int rowBytes = width * bytesPerPixel;
+
+		// DWORD align rows
+		int padding = (4 - (rowBytes % 4)) % 4;
+		int stride  = rowBytes + padding;
+
+		int imageSize = stride * height;
+		int totalSize = sizeof(BITMAPINFOHEADER) + imageSize;
+
+		// Allocate global memory for clipboard
+		HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, totalSize);
+		if (!hMem) return;
+
+		LPBITMAPINFOHEADER bi =
+			(LPBITMAPINFOHEADER)GlobalLock(hMem);
+
+		if (!bi) {
+			GlobalFree(hMem);
+			return;
+		}
+
+		// --- Fill BITMAPINFOHEADER ---
+		ZeroMemory(bi, sizeof(BITMAPINFOHEADER));
+		bi->biSize        = sizeof(BITMAPINFOHEADER);
+		bi->biWidth       = width;
+		bi->biHeight      = height;          // bottom-up DIB
+		bi->biPlanes      = 1;
+		bi->biBitCount    = 24;
+		bi->biCompression = BI_RGB;
+		bi->biSizeImage   = imageSize;
+
+		// Pointer to pixel data immediately after header
+		uint8_t* dst = ((uint8_t*)bi) + sizeof(BITMAPINFOHEADER);
+
+		// Source RGBA buffer
+		uint8_t* src = (uint8_t*)srcImage->buffer->data->buffer->b;
+
+		// --- Convert RGBA → BGR, flip vertically ---
+		for (int y = 0; y < height; y++) {
+
+			int srcY = height - 1 - y; // flip Y
+			uint8_t* dstRow = dst + (y * stride);
+
+			for (int x = 0; x < width; x++) {
+
+				int srcPos = (srcY * width + x) * 4;
+				int dstPos = x * 3;
+
+				// BGR order
+				dstRow[dstPos + 0] = src[srcPos + 2]; // B
+				dstRow[dstPos + 1] = src[srcPos + 1]; // G
+				dstRow[dstPos + 2] = src[srcPos + 0]; // R
+			}
+
+			// Zero padding bytes (optional but nice)
+			for (int p = 0; p < padding; p++) {
+				dstRow[rowBytes + p] = 0;
+			}
+		}
+
+		GlobalUnlock(hMem);
+
+		// --- Push to clipboard ---
+		if (OpenClipboard(NULL)) {
+			EmptyClipboard();
+			SetClipboardData(CF_DIB, hMem);
+			CloseClipboard();
+			// IMPORTANT: do NOT free hMem after this
+		} else {
+			GlobalFree(hMem);
 		}
 
 	#endif

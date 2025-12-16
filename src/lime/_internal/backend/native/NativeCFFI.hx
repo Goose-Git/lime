@@ -632,6 +632,7 @@ class NativeCFFI
 	private static var lime_get_global_mouse_y = new cpp.Callable<Void->Int>(cpp.Prime._loadPrime("lime", "lime_get_global_mouse_y", "i", false));
 	private static var lime_get_clipboard_image_size = new cpp.Callable<cpp.Object->Void>(cpp.Prime._loadPrime("lime", "lime_get_clipboard_image_size", "ov", false));
 	private static var lime_get_clipboard_image_pixels = new cpp.Callable<cpp.Object->Void>(cpp.Prime._loadPrime("lime", "lime_get_clipboard_image_pixels", "ov", false));
+	private static var lime_set_clipboard_image_pixels = new cpp.Callable<cpp.Object->Void>(cpp.Prime._loadPrime("lime", "lime_set_clipboard_image_pixels", "ov", false));
 	private static var lime_window_get_border_thickness = new cpp.Callable<cpp.Object->Int>(cpp.Prime._loadPrime("lime", "lime_window_get_border_thickness", "oi", false));  
 	private static var lime_window_get_titlebar_height = new cpp.Callable<cpp.Object->Int>(cpp.Prime._loadPrime("lime", "lime_window_get_titlebar_height", "oi", false));    
 	private static var lime_window_hide = new cpp.Callable<cpp.Object->Bool->cpp.Void>(cpp.Prime._loadPrime("lime", "lime_window_hide","obv", false));
@@ -804,6 +805,7 @@ class NativeCFFI
 	private static var lime_get_global_mouse_y = CFFI.load("lime", "lime_get_global_mouse_y", 0);
 	private static var lime_get_clipboard_image_size = CFFI.load("lime", "lime_get_clipboard_image_size", 1);
 	private static var lime_get_clipboard_image_pixels = CFFI.load("lime", "lime_get_clipboard_image_pixels", 1);
+	private static var lime_set_clipboard_image_pixels = CFFI.load("lime", "lime_set_clipboard_image_pixels", 1);
 	private static var lime_window_get_border_thickness = CFFI.load("lime", "lime_window_get_border_thickness", 1);
 	private static var lime_window_get_titlebar_height = CFFI.load("lime", "lime_window_get_titlebar_height", 1);
 	private static var lime_window_hide = CFFI.load("lime", "lime_window_hide", 2);
@@ -1440,6 +1442,7 @@ class NativeCFFI
 	@:hlNative("lime", "hl_get_global_mouse_y") private static function lime_get_global_mouse_y():Int { return 0; }
 	@:hlNative("lime", "hl_get_clipboard_image_size") private static function lime_get_clipboard_image_size(size:Rectangle):Void {}
 	@:hlNative("lime", "hl_get_clipboard_image_pixels") private static function lime_get_clipboard_image_pixels(image:Image):Void {}
+	@:hlNative("lime", "hl_set_clipboard_image_pixels") private static function lime_set_clipboard_image_pixels(image:Image):Void {}
 	@:hlNative("lime", "hl_window_get_border_thickness") private static function lime_window_get_border_thickness(handle:CFFIPointer):Int{ return 0; }
 	@:hlNative("lime", "hl_window_get_titlebar_height") private static function lime_window_get_titlebar_height(handle:CFFIPointer):Int{ return 0; }
 	@:hlNative("lime", "hl_window_hide") private static function lime_window_hide(handle:CFFIPointer, hide:Bool):Void {}
