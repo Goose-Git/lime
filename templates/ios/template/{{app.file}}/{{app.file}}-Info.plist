@@ -47,6 +47,9 @@
 		::end::
 	</array>
 	
+	<!-- Added 2026 (Greg)-->
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Tracking helps us show relevant ads and improve the app experience for you.</string>
 
 
 	::if SET_FIREBASE_INTEGRATION::
