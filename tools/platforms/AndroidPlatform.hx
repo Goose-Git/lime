@@ -151,7 +151,7 @@ class AndroidPlatform extends PlatformTarget
         		Log.error("Bundling requires a release keystore (upload key). Add <certificate .../> to project.xml.");			
 
 			// Use ALL architectures including x86_64 as this can be used for Google play games on PC
-			project.architectures = [Architecture.ARMV7, Architecture.ARM64, Architecture.X64/*, Architecture.X86*/ ];
+			project.architectures = [Architecture.ARMV7, Architecture.ARM64, Architecture.X64, Architecture.X86 ];
 		}
 		else{
 
@@ -160,12 +160,24 @@ class AndroidPlatform extends PlatformTarget
 			// lime test android -debug -no_arm7
 			//
 			// This is what you would want to test on modern phones with (dont usally need arm7)
-			if ( project.targetFlags.exists("no_arm7") || project.targetFlags.exists("quick")|| project.targetFlags.exists("fast"))
+			if ( project.targetFlags.exists("no_arm7") || project.targetFlags.exists("quick")|| project.targetFlags.exists("fast")){
 				project.architectures.remove(Architecture.ARMV7);
+				project.architectures.remove(Architecture.X64);
+				project.architectures.remove(Architecture.X86);
+			}
 
 			if ( project.targetFlags.exists("no_arm64"))
 				project.architectures.remove(Architecture.ARM64);
 		}
+
+		// Added 13/02/2026 Greg
+		// rebuild command does ALL architectures
+		// Added this so that when we rebuild lime it will build it for all architectures. The extensions also
+		// use rebuild so this handles them as well.
+		if ( command == "rebuild" ){
+			trace("Rebuild command detected - looks like we are rebuilding lime itself - so all all architectures");
+			project.architectures = [Architecture.ARMV7, Architecture.ARM64, Architecture.X64, Architecture.X86 ];
+		}	
 
 		trace("Building Architectures: " + project.architectures);
 
