@@ -24,6 +24,29 @@
 @interface GooseDelegate : SDLUIKitDelegate
 @end
 
+// storing universal link in deep_link_url for retrieval
+static void GooseStoreUniversalLink(NSUserActivity *userActivity)
+{
+	if (![userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb])
+	{
+		return;
+	}
+
+	NSURL *url = userActivity.webpageURL;
+
+	if (url == nil)
+	{
+		return;
+	}
+
+	NSString *urlString = [url absoluteString];
+
+	NSLog(@"[UniversalLink] Stored URL: %@", urlString);
+
+	[[NSUserDefaults standardUserDefaults] setObject:urlString forKey:@"deep_link_url"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+}
+
 @implementation GooseDelegate
 
 	// -------------------------------------
@@ -71,6 +94,27 @@
 		return handled || [super application:app
 									openURL:url
 									options:options];
+	}
+
+	// -------------------------------------
+	// continueUserActivity
+	// Handles Universal Links into this app
+	// -------------------------------------
+	- (BOOL)application:(UIApplication *)application
+	continueUserActivity:(NSUserActivity *)userActivity
+	restorationHandler:(void (^)(NSArray *restorableObjects))restorationHandler
+	{
+		BOOL isUniversalLink = [userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb];
+
+		if (isUniversalLink)
+		{
+			GooseStoreUniversalLink(userActivity);
+			return YES;
+		}
+
+		return [super application:application
+			continueUserActivity:userActivity
+			restorationHandler:restorationHandler];
 	}
 
 @end
