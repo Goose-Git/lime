@@ -18,6 +18,12 @@
 	<key>com.apple.developer.game-center</key>
 	<true/>
 	::end::
+	::if SET_APP_URL_HOST::	
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:::SET_APP_URL_HOST::</string>
+	</array>
+	::end::
     <key>get-task-allow</key>
     <true/>
 </dict>
