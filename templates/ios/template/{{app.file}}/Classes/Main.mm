@@ -1,5 +1,9 @@
 #include <stdio.h>
 
+
+// --------------------------------------
+// Main.mm
+// --------------------------------------
 // --------------------------------------
 // 1) Overriding SDL's appDelegate
 // to provide access to didFinishLaunchingWithOptions
@@ -19,6 +23,14 @@
 
 // refers to the copy of SDL_uikitappdelegate.h also in goose templates:
 #import "SDL_uikitappdelegate.h"
+
+// forward declaring this function so we can use it in CNativeFunctions
+::if SET_INERTIA_FUNCTIONS::
+namespace inertia
+{
+	void onResume();
+}
+::end::
 
 // --- Subclass SDLUIKitDelegate ---
 @interface GooseDelegate : SDLUIKitDelegate
@@ -109,9 +121,19 @@ static void GooseStoreUniversalLink(NSUserActivity *userActivity)
 		if (isUniversalLink)
 		{
 			GooseStoreUniversalLink(userActivity);
+
+			// Notify Haxe that new deep link params are available.
+			::if SET_INERTIA_FUNCTIONS::
+				inertia::onResume();
+			::end::
 			return YES;
 		}
 
+		// Notify Haxe that new deep link params are available.
+		::if SET_INERTIA_FUNCTIONS::
+			inertia::onResume();
+		::end::
+		
 		return [super application:application
 			continueUserActivity:userActivity
 			restorationHandler:restorationHandler];
