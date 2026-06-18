@@ -60,6 +60,7 @@ class HTML5Window
 
 	private var cacheElementHeight:Float;
 	private var cacheElementWidth:Float;
+	private var cacheElementScale:Float;
 	private var cacheMouseX:Float;
 	private var cacheMouseY:Float;
 	private var cursor:MouseCursor;
@@ -104,12 +105,7 @@ class HTML5Window
 
 		var element = parent.element;
 
-		if (Reflect.hasField(attributes, "allowHighDPI") && attributes.allowHighDPI && renderType != DOM)
-		{
-			scale = Browser.window.devicePixelRatio;
-		}
-
-		parent.__scale = scale;
+		updateParentScale();
 
 		setWidth = Reflect.hasField(attributes, "width") ? attributes.width : 0;
 		setHeight = Reflect.hasField(attributes, "height") ? attributes.height : 0;
@@ -170,6 +166,7 @@ class HTML5Window
 
 			cacheElementWidth = parent.__width;
 			cacheElementHeight = parent.__height;
+			cacheElementScale = parent.__scale;
 
 			resizeElement = true;
 		}
@@ -193,6 +190,8 @@ class HTML5Window
 		{
 			parent.__resizable = true;
 		}
+
+		//traceScaleStats();
 
 		updateSize();
 
@@ -239,6 +238,24 @@ class HTML5Window
 			canvas.addEventListener("webglcontextlost", handleContextEvent, false);
 			canvas.addEventListener("webglcontextrestored", handleContextEvent, false);
 		}
+
+		
+		//traceScaleStats();
+	}
+
+	function updateParentScale():Void
+	{
+		var attributes = parent.__attributes;
+
+		if (Reflect.hasField(attributes, "allowHighDPI") && attributes.allowHighDPI && renderType != DOM)
+		{
+			scale = Browser.window.devicePixelRatio;
+		}
+
+		// scale changes with browser zoom. Is your normal DPI to begin with.
+
+		parent.__scale = scale;
+		
 	}
 
 	public function alert(message:String, title:String):Void
@@ -1340,6 +1357,8 @@ class HTML5Window
 	{
 		if (!parent.__resizable) return;
 
+		updateParentScale();
+
 		var elementWidth, elementHeight;
 
 		if (parent.element != null)
@@ -1353,10 +1372,11 @@ class HTML5Window
 			elementHeight = Browser.window.innerHeight;
 		}
 
-		if (elementWidth != cacheElementWidth || elementHeight != cacheElementHeight)
+		if (elementWidth != cacheElementWidth || elementHeight != cacheElementHeight || scale != cacheElementScale)
 		{
 			cacheElementWidth = elementWidth;
 			cacheElementHeight = elementHeight;
+			cacheElementScale = scale;
 
 			var stretch = resizeElement || (setWidth == 0 && setHeight == 0);
 
@@ -1385,7 +1405,8 @@ class HTML5Window
 							div.style.width = elementWidth + "px";
 							div.style.height = elementHeight + "px";
 						}
-
+						
+						//traceScaleStats();
 						parent.onResize.dispatch(elementWidth, elementHeight);
 					}
 				}
@@ -1431,6 +1452,16 @@ class HTML5Window
 			}
 		}
 	}
+
+	function traceScaleStats():Void 
+	{
+
+		trace("***** HTML5Window: parent.__scale = " + parent.__scale);
+		trace("***** HTML5Window: parent.__width = " + parent.__width);
+		trace("***** HTML5Window: canvas.width = " + canvas.width);
+		trace("***** HTML5Window: canvas.style.width = " + canvas.style.width);
+	}
+
 
 	public function warpMouse(x:Int, y:Int):Void {}
 }
