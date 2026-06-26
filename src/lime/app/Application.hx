@@ -681,7 +681,7 @@ class Application extends Module
 	public function handleException(e:Exception):Void
 	{
 		// This would be called by the native backend system when they catch a general exception
-		// Call the CCrashReporter
+		// Call the CrashReporter
 		trace("==== CRASH DETECTED ====");
 		trace("==== haxe exception handled: " + e.message);
 		onException.dispatch(e);
@@ -689,6 +689,14 @@ class Application extends Module
 
 	public inline function safeCall(func:Void->Void):Void
 	{	
+		// In debug mode we might want to disable crash handling so that we can actually 
+		// see where things are crashing and fix them
+	#if (debug && disable_crash_handling)
+		func();
+	#else
+		// Try and wrap as many of the engine entry point calls in this as possible,
+		// so update loop, render, mouse clicks, extension callbacks - anything called from outside.
+		// See the Crash reporter as this will hook into this.
 		try
 		{
 			func();
@@ -697,7 +705,9 @@ class Application extends Module
 		{
 			handleException(e);
 		}
+	#end
 	}
+
 }
 
 #if air

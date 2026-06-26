@@ -842,6 +842,24 @@ class HXProject extends Script
 				defines.set("host", "unknown");
 		}
 
+		// ---------
+		// GREGDENNESS
+		// GOOSE
+		// Added 2026
+		// Make the custom Amazon target flag available to Haxe as #if amazon.
+		// The command line uses "-amazon", which arrives here as targetFlags["amazon"],
+		// but Haxe code needs the real compiler define "-D amazon".
+		//
+		// I tried all ways of adding this to AmazonPlatform, but just couldnt get it to work.
+		// This is not the best place.
+		//
+		if (targetFlags.exists("amazon") || defines.exists("amazon"))
+		{
+			defines.set("amazon", "1");
+			haxedefs.set("amazon", "1");
+		}
+		// ----------
+
 		#if lime
 		defines.set("lime-tools", "1");
 		#end

@@ -28,19 +28,6 @@ class AmazonPlatform
 	// Where the test user json file lives on the Kindle
 	static private var testUserJSONPath:String = "/sdcard/amazon.sdktester.json";
 
-	// -------------------------------------------
-	// Name: defineAmazonHaxeFlag
-	// -------------------------------------------
-	static public function defineAmazonHaxeFlag(project:HXProject){
-		if (!isTargetAmazonBuild(project)) 
-			return;
-		
-		trace("** Defining amazon haxe flag");
-
-		// This makes the haxe code which uses "#if amazon" work
-		project.haxeflags.push("-D");
-   	 	project.haxeflags.push("amazon");
-	}
 
 	// -------------------------------------------
 	// Name: defineAmazonContextFlag
@@ -48,9 +35,9 @@ class AmazonPlatform
 	static public function defineAmazonContextFlag(project:HXProject, context:Dynamic){
 		if (!isTargetAmazonBuild(project)) 
 			return;
-		
-		trace("** Adding amazon context flag");
 
+		trace("** Adding amazon context flag");
+		
 		// This makes the java templates which rely on ::DEFINE_AMAZON:: work
 		Reflect.setField(context, "DEFINE_AMAZON", "true");
 	}
