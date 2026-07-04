@@ -3,6 +3,7 @@ import java.awt.GridBagLayout
 import java.awt.GridBagConstraints
 import javax.swing.border.EmptyBorder
 
+
 apply plugin: 'com.android.application'
 
 ::if SET_FIREBASE_INTEGRATION:: // Lucy added 2025
@@ -77,6 +78,21 @@ android {
 		release {
 			minifyEnabled false
 			signingConfig signingConfigs.release
+
+			// Fix for Amazon tester App
+			// -------------------------
+			// GREGDENNESS
+			// GOOSE
+			// Amazon App Tester requires the installed app to be debuggable.
+			// Only enable this for local Amazon IAP sandbox testing.
+
+			::if DEBUG::
+				::if DEFINE_AMAZON::
+					println "AMAZON DEBUG BUILD"
+					println "*** This is a debug Amazon build - so setting debuggable to true (for Amazon Tester App)"
+					debuggable true
+				::end::
+			::end::
 		}
 	}
 
