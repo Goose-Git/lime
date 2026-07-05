@@ -3,6 +3,9 @@ import java.awt.GridBagLayout
 import java.awt.GridBagConstraints
 import javax.swing.border.EmptyBorder
 
+//println "DPW define DEFINE_AMAZON = ::if DEFINE_AMAZON::true::else::false::end::"
+//println "DPW define DEFINE_AMAZON_IAP_TESTER = ::if DEFINE_AMAZON_IAP_TESTER::true::else::false::end::"
+
 
 apply plugin: 'com.android.application'
 
@@ -83,13 +86,16 @@ android {
 			// -------------------------
 			// GREGDENNESS
 			// GOOSE
-			// Amazon App Tester requires the installed app to be debuggable.
+			// Amazon App Tester requires the installed app to be "debuggable".
 			// Only enable this for local Amazon IAP sandbox testing.
-
-			::if DEBUG::
+			//
+			// Test local "sandbox" Amazon purchases like:
+			// lime test android -amazon -DAMAZON_IAP_TESTER
+			//
+			::if DEFINE_AMAZON_IAP_TESTER::
 				::if DEFINE_AMAZON::
-					println "AMAZON DEBUG BUILD"
-					println "*** This is a debug Amazon build - so setting debuggable to true (for Amazon Tester App)"
+					println "**************  AMAZON LOCAL IAP TESTING *********************"
+					println "** AMAZON IAP local test is enabled, make sure you have the tester app and follow all the instructions! **"
 					debuggable true
 				::end::
 			::end::
