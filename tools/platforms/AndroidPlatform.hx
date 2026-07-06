@@ -128,7 +128,7 @@ class AndroidPlatform extends PlatformTarget
 		trace("lime test android -bundle						: AAB for Google Play submission" );
 		trace("" );
 		trace("--- Amazon -------------------------------------" );
-		trace("lime test android -amazon -DAMAZON_IAP_TESTER	: Amazon local IAP testing" );
+		trace("lime test android -amazon -DIAP_TEST_MODE		: Amazon local IAP testing" );
 		trace("lime test android -release -amazon 				: APK for Amazon submission" );
 		trace("" );
 		trace("==============================================================" );

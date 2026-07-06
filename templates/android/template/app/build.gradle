@@ -90,9 +90,9 @@ android {
 			// Only enable this for local Amazon IAP sandbox testing.
 			//
 			// Test local "sandbox" Amazon purchases like:
-			// lime test android -amazon -DAMAZON_IAP_TESTER
+			// lime test android -amazon -IAP_TEST_MODE
 			//
-			::if DEFINE_AMAZON_IAP_TESTER::
+			::if DEFINE_IAP_TEST_MODE::
 				::if DEFINE_AMAZON::
 					println "**************  AMAZON LOCAL IAP TESTING *********************"
 					println "** AMAZON IAP local test is enabled, make sure you have the tester app and follow all the instructions! **"
