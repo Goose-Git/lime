@@ -111,6 +111,21 @@ class IOSPlatform extends PlatformTarget
 		}
 
 		targetDirectory = Path.combine(project.app.path, project.config.getString("ios.output-directory", "ios"));
+
+
+		// ---------------------
+		// Added 2026
+		// GOOSE
+		// GREGDENNESS
+		//
+		//
+		trace("==============================================================" );
+		trace("Building for iOS, options are:" );
+		trace("" );
+		trace("lime test ios -xcode							: xcode build" );
+		trace("lime test ios -debug -xcode -DIAP_TEST_MODE 	: enable test purchases" );
+		trace("==============================================================" );
+
 	}
 
 	public override function build():Void
