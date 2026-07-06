@@ -113,6 +113,7 @@ class IOSPlatform extends PlatformTarget
 		targetDirectory = Path.combine(project.app.path, project.config.getString("ios.output-directory", "ios"));
 
 
+		/* Dont include this unless we start using test purchases for all games
 		// ---------------------
 		// Added 2026
 		// GOOSE
@@ -125,6 +126,7 @@ class IOSPlatform extends PlatformTarget
 		trace("lime test ios -xcode							: xcode build" );
 		trace("lime test ios -debug -xcode -DIAP_TEST_MODE 	: enable test purchases" );
 		trace("==============================================================" );
+		*/
 
 	}
 
