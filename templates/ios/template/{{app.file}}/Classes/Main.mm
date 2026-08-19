@@ -10,10 +10,6 @@
 // --------------------------------------
 #import <UIKit/UIKit.h>
 
-::if INERTIA_IOS_AMBIENT_AUDIO::
-#import <AVFAudio/AVAudioSession.h>
-::end::
-
 ::if SET_FIREBASE_INTEGRATION::
 // Import Firebase (if you want to use Firebase):
 #import <GooseFirebase/GFirebase.h>
@@ -177,22 +173,6 @@ extern "C" int ::nameSafe::_register_prims ();::end::::end::
 extern "C" int SDL_main (int argc, char *argv[]) {
 
 	hxcpp_set_top_of_stack ();
-
-	::if INERTIA_IOS_AMBIENT_AUDIO::
-	// AudioManager opens the OpenAL device while hxRunLibrary starts Haxe.
-	// Configure the shared session first so that initial activation does not
-	// interrupt music or podcasts already playing in another application.
-	AVAudioSession *audioSession = [AVAudioSession sharedInstance];
-	NSError *audioSessionError = nil;
-
-	if (![audioSession setCategory:AVAudioSessionCategoryAmbient
-		mode:AVAudioSessionModeDefault
-		options:AVAudioSessionCategoryOptionMixWithOthers
-		error:&audioSessionError])
-	{
-		NSLog(@"Unable to configure ambient audio session: %@", audioSessionError);
-	}
-	::end::
 
 	zlib_register_prims ();
 	lime_register_prims ();
