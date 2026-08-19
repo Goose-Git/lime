@@ -40,6 +40,13 @@ namespace lime {
 		SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 #endif
 
+		#if defined(IPHONE) && defined(INERTIA_IOS_AMBIENT_AUDIO)
+		// This must be set before SDL_INIT_AUDIO. Setting AVAudioSession back to
+		// ambient later is too late: opening a non-ambient session may already
+		// have interrupted music or podcasts playing in another application.
+		SDL_SetHint(SDL_HINT_AUDIO_CATEGORY, "AVAudioSessionCategoryAmbient");
+		#endif
+
 		if (SDL_Init (initFlags) != 0) {
 
 			printf ("Could not initialize SDL: %s.\n", SDL_GetError ());

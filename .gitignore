@@ -2,6 +2,7 @@
 .DS_Store
 .DS_Store?
 Export/
+templates/bin/hl/*
 ndll/*/lime*
 ndll/*/liblime*
 ndll/*/*.hdll
