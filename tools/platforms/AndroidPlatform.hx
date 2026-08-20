@@ -117,21 +117,7 @@ class AndroidPlatform extends PlatformTarget
 		// Allow aab bundle builds for final release to google play store by using:
 		// lime test android -bundle
 		//
-		trace("==============================================================" );
-		trace("Building for Android, options are:" );
-		trace("" );
-		trace("--- Google Play -------------------------------------" );
-		trace("lime test android -debug -quick					: arm64 only, fast test builds" );
-		trace("lime test android -debug -quick					: arm64 only, fast test builds" );
-		trace("lime test android -debug -no_arm64				: arm7 only, testing on arm7 devices" );
-		trace("lime test android -debug -simulator				: for testing on simulator" );
-		trace("lime test android -bundle						: AAB for Google Play submission" );
-		trace("" );
-		trace("--- Amazon -------------------------------------" );
-		trace("lime test android -amazon -DIAP_TEST_MODE		: Amazon local IAP testing" );
-		trace("lime test android -release -amazon 				: APK for Amazon submission" );
-		trace("" );
-		trace("==============================================================" );
+		printAndroidBuildOptions();
 
 		if (project.targetFlags.exists("bundle")) 
 		{
@@ -787,5 +773,85 @@ class AndroidPlatform extends PlatformTarget
 
 		var command = ProjectHelper.getCurrentCommand();
 		System.watch(command, dirs);
+	}
+
+	private static inline final ESC:String = "\x1b[";
+	private static inline final RESET:String = ESC + "0m";
+	private static inline final BOLD:String = ESC + "1m";
+	private static inline final CYAN:String = ESC + "36m";
+	private static inline final GREEN:String = ESC + "32m";
+	private static inline final DIM:String = ESC + "2m";
+	private static inline final RED:String = ESC + "31m";
+
+	// ---------------------
+	// Added 2026
+	// GOOSE
+	// GREGDENNESS
+	private static function printBuildOption(command:String, description:String):Void
+	{
+		var paddedCommand = StringTools.rpad(command, " ", 55);
+
+		Sys.println(
+			GREEN + paddedCommand + RESET
+			+ DIM + description + RESET
+		);
+	}
+	private static function printAndroidBuildOptions():Void
+	{
+		Sys.println("");
+	
+		Sys.println(CYAN + BOLD
+			+ "===============================================================================" 
+			+ RESET);
+		Sys.println(CYAN + BOLD
+			+ "                         Android build options"
+			+ RESET);
+		Sys.println(CYAN + BOLD
+			+ "==============================================================================="
+			+ RESET);
+
+		Sys.println("");
+		Sys.println(CYAN + BOLD + "Google Play" + RESET);
+		Sys.println(CYAN
+			+ "-------------------------------------------------------------------------------"
+			+ RESET);
+
+		printBuildOption(
+			"lime test android -debug -quick",
+			"ARM64 only; fast test build"
+		);
+		printBuildOption(
+			"lime test android -debug -no_arm64",
+			"ARMv7 only; test on older devices"
+		);
+		printBuildOption(
+			"lime test android -debug -simulator",
+			"Build for the Android simulator"
+		);
+		printBuildOption(
+			"lime test android -bundle",
+			"AAB for Google Play submission"
+		);
+
+		Sys.println("");
+		Sys.println(CYAN + BOLD + "Amazon" + RESET);
+		Sys.println(CYAN
+			+ "-------------------------------------------------------------------------------"
+			+ RESET);
+
+		printBuildOption(
+			"lime test android -amazon -DIAP_TEST_MODE",
+			"Local Amazon IAP testing"
+		);
+		printBuildOption(
+			"lime test android -amazon -DAMAZON_TEST_LOGIN",
+			"Local Amazon login testing"
+		);
+		printBuildOption(
+			"lime test android -release -amazon",
+			"APK for Amazon submission"
+		);
+		Sys.println("");
+		
 	}
 }
