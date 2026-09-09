@@ -79,8 +79,17 @@ android {
 
 	buildTypes {
 		release {
-			minifyEnabled false
+
+			// -------------------------
+			// GREGDENNESS
+			// GOOSE
+			// Google Play wants the release builds to be optimised
+			// https://developer.android.com/topic/performance/app-optimization/enable-app-optimization
+			minifyEnabled true
+			shrinkResources true
+			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 			signingConfig signingConfigs.release
+			println "** Enabling proguard and optimisation"
 
 			// Fix for Amazon tester App
 			// -------------------------
